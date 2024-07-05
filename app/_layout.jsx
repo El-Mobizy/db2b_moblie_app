@@ -3,7 +3,8 @@ import { useFonts } from "expo-font";
 // import "react-native-url-polyfill/auto";
 import { SplashScreen, Stack } from "expo-router";
 import { Provider } from 'react-redux';
-import store from '../store/store';
+import { PersistGate } from 'redux-persist/integration/react';
+import { store, persistor } from '../store/store';
 import GlobalProvider from "../context/GlobalProvider";
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -37,15 +38,16 @@ const RootLayout = () => {
   return (
     <GlobalProvider>
       <Provider store={store}>
+        <PersistGate persistor={persistor}>
           <Stack>
-          {/* <Stack.Screen name="(tabs)" options={{ headerShown: false }} /> */}
-          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-          <Stack.Screen name="(onboard)" options={{ headerShown: false }} />
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-          <Stack.Screen name="(screen)" options={{ headerShown: false }} />
-          {/* <Stack.Screen name="search/[query]" options={{ headerShown: false }} /> */}
-        </Stack>
+            <Stack.Screen name="(onboard)" options={{ headerShown: false }} />
+            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="index" options={{ headerShown: false }} />
+            <Stack.Screen name="(screen)" options={{ headerShown: false }} />
+            {/* <Stack.Screen name="search/[query]" options={{ headerShown: false }} /> */}
+          </Stack>
+        </PersistGate>
       </Provider>
     </GlobalProvider>
   );

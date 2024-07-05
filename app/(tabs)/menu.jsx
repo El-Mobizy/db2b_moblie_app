@@ -28,7 +28,7 @@ import CartComponent from '../../components/cart';
 import { CustomButton, FormField } from "../../components";
 import { GestureHandlerRootView, } from 'react-native-gesture-handler';
 import { useDispatch, useSelector } from 'react-redux';
-import { getAllProducts, addToFavorite, addToCart } from '../../store/features/productSlice';
+import { getAllProducts, toggleToFavorite, addToCart } from '../../store/features/productSlice';
 import { useNavigation } from "@react-navigation/native";
 import Modal from '../../components/Modal'; 
 
@@ -51,47 +51,49 @@ const Home = ({ handleSwitch, showMenu }) => {
     );
   };
 
-  const handleToggleFavorite = (productId) => {
-    setLoader(true)
-    openModal()
-    dispatch(toggleFavorite(productId))
-      .unwrap()
-      .then(updatedProducts => {
-        console.log('Produits mis à jour :', updatedProducts);
-        setLoader(false)
-        setTitle("Success !")
-        setMessage("Ad added to wishlist successfully !")
-        setProducts(updatedProducts)
-      })
-      .catch(error => {
-        console.error('Erreur lors du basculement des favoris :', error);
-        setTitle("Error !")
-        setMessage("An error occured. Please, try again later")
-      });
-  };
-  // handleToggleFavorite = async (adId) => {
-  //   console.log(adId)
-  //   try {
-  //     setLoader(true)
-  //     openModal()
-  //     const response = await dispatch(addToFavorite(adId)).unwrap();
-  //     console.log('Requête terminée');
-  //     const info = response?.message ?? "An error occured. Please, try again later";
-  //     if (info) {
+  // const handleToggleFavorite = (productId) => {
+  //   setLoader(true)
+  //   openModal()
+  //   dispatch(toggleFavorite(productId))
+  //     .unwrap()
+  //     .then(updatedProducts => {
+  //       console.log('Produits mis à jour :', updatedProducts);
   //       setLoader(false)
-  //     }
-  //     if ( info && info === "Ad added to wishlist successfully !") {
-  //         setTitle("Success !")
-  //         setMessage(info)
-  //     }
-  //     else{
+  //       setTitle("Success !")
+  //       setMessage("Ad added to wishlist successfully !")
+  //       setProducts(updatedProducts)
+  //     })
+  //     .catch(error => {
+  //       console.error('Erreur lors du basculement des favoris :', error);
   //       setTitle("Error !")
-  //       setMessage(info)
-  //     }
-  //   } catch (error) {
-  //   } finally {
-  //   }
+  //       setMessage("An error occured. Please, try again later")
+  //     });
   // };
+  handleToggleFavorite = async (adId) => {
+    console.log(adId)
+    try {
+      setLoader(true)
+      openModal()
+      const response = await dispatch(toggleToFavorite(adId)).unwrap();
+      console.log('Requête terminée');
+      const wislist = response.data
+      console.log('liste des favoris', wislist);
+      const info = response?.message ?? "An error occured. Please, try again later";
+      if (info) {
+        setLoader(false)
+      }
+      if ( info && info === "Product added to wishlist successfully !" || "Product retrieve from wishlist successfully !") {
+          setTitle("Success !")
+          setMessage(info)
+      }
+      else{
+        setTitle("Error !")
+        setMessage(info)
+      }
+    } catch (error) {
+    } finally {
+    }
+  };
   handleAddToCart = async (adId) => {
     console.log(adId)
     try {
@@ -123,11 +125,10 @@ const Home = ({ handleSwitch, showMenu }) => {
   const handleGetProducts = async () => {
     try {
       const response = await dispatch(getAllProducts()).unwrap();
-      // console.log('Requête terminée');
+      console.log('Requête terminée');
       const info = response.data;
-      const Ads = 
-      // setProducts(info)
-      // console.log('les produits meme', products);
+      setProducts(info)
+      console.log('les produits meme', info);
     } catch (error) {
     } finally {
     }
@@ -238,6 +239,11 @@ const Home = ({ handleSwitch, showMenu }) => {
                   />
                 ))
                 }
+                {!isLoading && products.length === 0 && (
+                        <View className="flex items-center justify-center h-full">
+                            <Text className="text-lg text-gray-500">No products available</Text>
+                        </View>
+                    )}
               </View>}
           </View>
         </ScrollView>
@@ -258,7 +264,6 @@ const Home = ({ handleSwitch, showMenu }) => {
        </View>
      </Modal>
     </>
-
   )
 }
 

@@ -15,7 +15,7 @@ const PageTitle = ({name, returnRoute}) => {
                     </View> 
                 </TouchableOpacity>
                 
-                <Text className="font-pmedium text-black text-xl">
+                <Text className="font-rmedium text-black text-xl">
                     { name }
                 </Text>
     </View>

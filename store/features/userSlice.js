@@ -1,6 +1,6 @@
 // src/features/user/userSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import api, { storeToken } from '../api';
+import api, { storeSecure, getSecure } from '../api';
 
 const initialState = {
   phone: '',
@@ -18,6 +18,7 @@ const initialState = {
   error : "",
   IpAdress : "",
   token: null,
+  userId: null,
 };
 // Thunk pour l'inscription
 export const signUpUser = createAsyncThunk(
@@ -91,6 +92,20 @@ export const sendCode = createAsyncThunk(
   }
 );
 
+// Thunk pour l'envoi du mail de connexion
+export const getNewCode = createAsyncThunk(
+  'users/new_code',
+  async (_, { rejectWithValue }) => {
+    try {
+      const route = 'users/new_code/'+userId;
+      const response = await api.post(route);
+      console.log(response.data);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
 const userSlice = createSlice({
   name: 'user',
   initialState,
@@ -133,6 +148,7 @@ const userSlice = createSlice({
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoading = false;
+        state.userId = action.payload.user.id
         if (action.payload.access_token) {
           const token = action.payload.access_token
           storeSecure('userToken', token)
@@ -165,6 +181,17 @@ const userSlice = createSlice({
         state.isLoading = false;
       })
       .addCase(sendCode.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      .addCase(getNewCode.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(getNewCode.fulfilled, (state, action) => {
+        state.isLoading = false;
+      })
+      .addCase(getNewCode.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       });

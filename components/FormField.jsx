@@ -20,7 +20,7 @@ const FormField = ({
   const labelPosition = useRef(new Animated.Value(0)).current;
   const [validationMessage, setValidationMessage] = useState('');
   const [classeState, setClasseState] = useState('hidden');
-  const [cla, setCla] = useState('focus:border-[#d142f5]');
+  const [cla, setCla] = useState('focus:border-principal');
 
   useEffect(() => {
     if (valeur != "") {
@@ -82,12 +82,12 @@ const FormField = ({
   const isValidEmail = (email) => {
     const mail = email.trim();
     if (mail.length <= 0) {
-      setClasseState('text-red-500 text-xs mt-1 font-medium');
+      setClasseState('text-red-500 text-xs mt-1 font-rmedium');
       setValidationMessage('Veuillez remplir le champ');
       setCla('focus:border-red-500');
       return false;
     } else if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(mail)) {
-      setClasseState('text-red-500 text-xs mt-1 font-medium');
+      setClasseState('text-red-500 text-xs mt-1 font-rmedium');
       setValidationMessage('Saisie incorrecte! Veuillez entrez un mail valide');
       setCla('focus:border-red-500');
       return false;
@@ -102,12 +102,12 @@ const FormField = ({
   const isValidText = (text) => {
     const texte = text.trim();
     if (texte.length <= 0) {
-      setClasseState('text-red-500 text-xs mt-1 font-medium');
+      setClasseState('text-red-500 text-xs mt-1 font-rmedium');
       setValidationMessage('Veuillez remplir le champ');
       setCla('focus:border-red-500');
       return false;
     } else if (!/^(.*[a-zA-Z].*){2,}$/u.test(texte)) {
-      setClasseState('text-red-500 text-xs mt-1 font-medium');
+      setClasseState('text-red-500 text-xs mt-1 font-rmedium');
       setValidationMessage('Cette chaîne doit être d\'au moins 2 caractères');
       setCla('focus:border-red-500');
       return false;
@@ -122,13 +122,13 @@ const FormField = ({
   const isValidPassword = (password) => {
     const pass = password.trim();
     if (pass.length <= 0) {
-      setClasseState('text-red-500 text-xs mt-1 font-medium');
+      setClasseState('text-red-500 text-xs mt-1 font-rmedium');
       setValidationMessage('Veuillez remplir le champ');
       setCla('focus:border-red-500');
       return false;
     } 
     else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$#!%*?&])[A-Za-z\d@$#!%*?&]{8,}$/.test(pass)) {
-      setClasseState('text-red-500 text-xs mt-1 font-medium');
+      setClasseState('text-red-500 text-xs mt-1 font-rmedium');
       setValidationMessage('Cette chaîne doit être d\'au moins 8 caractères dont un majuscule, un minuscule, un chiffre et un caractère spécial');
       setCla('focus:border-red-500');
       return false;
@@ -144,7 +144,7 @@ const FormField = ({
   const isValidNumber = (numero) => {
     const num = numero;
     if (num <= 0) {
-      setClasseState('text-red-500 text-xs mt-1 font-medium');
+      setClasseState('text-red-500 text-xs mt-1 font-rmedium');
       setValidationMessage('Veuillez remplir le champ');
       setCla('focus:border-red-500');
       return false;
@@ -158,7 +158,7 @@ const FormField = ({
 
   return (
     <View className={`flex justify-center ${otherStyles}`}>
-      <View className={`w-full h-14 px-4 rounded-lg border border-gray-400 flex flex-row items-center ${cla}`}>
+      <View className={`w-full h-[50px] px-4 rounded-md border border-gray-300 flex flex-row items-center ${cla}`}>
         <Animated.Text
           onPress={open}
           style={{
@@ -170,13 +170,13 @@ const FormField = ({
             paddingHorizontal: 5,
             zIndex: 1,
           }}
-          className="text-gray-500 font-pmedium"
+          className="text-gray-500 font-rregular"
         >
           {title}
         </Animated.Text>
         <TextInput
           ref={input}
-          className="flex-1 text-gray-700 text-base"
+          className="flex-1 text-gray-700 font-rregular text-base"
           value={valeur}
           type={type}
           placeholder={placeholder}

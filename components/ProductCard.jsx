@@ -48,7 +48,7 @@ const ProductCard = ({ item, handleProductClick, toggleFavorite, addProductToCar
         </View>
         <View className="product-info px-2 mt-5">
           <View className="flex justify-center w-full items-center flex-row">
-            <Text className="font-light text-center text-base">
+            <Text className="font-rlight text-center text-gray-500 text-base">
               {item.title}
             </Text>
             {/* <View className="flex justify-between items-center flex-row gap-2 ">
@@ -58,7 +58,7 @@ const ProductCard = ({ item, handleProductClick, toggleFavorite, addProductToCar
             </Text>
           </View> */}
           </View>
-          <Text className="text-xl mt-1 text-center text-black font-pmedium">
+          <Text className="text-xl mt-1 text-center text-gray-700 font-rmedium">
             XOF {item.price}
           </Text>
         </View>

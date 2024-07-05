@@ -68,7 +68,7 @@ const Welcome = () => {
               Already have an account ?
               </Text>
               <Link
-                href="/sign-in"
+                href="/auth"
                 className="text-sm font-rregular underline text-principal"
               >
                 Log in

@@ -31,8 +31,10 @@ const Tags = () => {
             return (
               <TouchableOpacity onPress={() => setSelected(item)}>
                 <Text
+                  className="font-rmedium text-sm rounded-full py-2 mr-2.5 px-8 bg-[#7910ff20] text-principal "
                   style={[
                     styles.tagText,
+                    
                     item == selected ? styles.isSelected : null,
                   ]}
                 >
@@ -54,17 +56,6 @@ const Tags = () => {
 export default Tags;
 
 const styles = StyleSheet.create({
-  tagText: {
-    fontSize: 14,
-    fontFamily: "Poppins-Regular",
-    borderRadius: 50,
-    paddingHorizontal: 30,
-    paddingVertical: 8,
-    marginRight: 10,
-    backgroundColor: "#7910ff20",
-    color: COLORS.principal,
-    fontWeight: "600",
-  },
   isSelected: {
     backgroundColor: COLORS.principal,
     color: "#FFFFFF",

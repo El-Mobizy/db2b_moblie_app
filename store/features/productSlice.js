@@ -4,6 +4,8 @@ import * as SecureStore from 'expo-secure-store';
 
 const initialState = { 
   products: [],
+  cart: [],
+  total: null,
   error: "",
   isLoading: false,
 };
@@ -20,41 +22,55 @@ export const getAllProducts = createAsyncThunk(
     }
   }
 );
-export const getProductsFromSecureStore = createAsyncThunk(
-  'products/fetchProductsFromSecureStore',
-  async (_, { rejectWithValue }) => {
+export const getDataFromSecureStore = createAsyncThunk(
+  'secureStore/getData',
+  async (key, { rejectWithValue }) => {
     try {
-      const productsJSON = getSecure('Allproducts'); // Récupère les produits depuis SecureStore
-      const products = JSON.parse(productsJSON) || []; // Convertit les produits JSON en objet JavaScript
-      return products;
+      const dataJSON = await SecureStore.getItemAsync(key); // Récupère les données depuis Secure Store avec la clé donnée
+      
+      const data = JSON.parse(dataJSON) || []; // Convertit les données JSON en objet JavaScript
+      console.log('les produits', data);
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.message); // Gère les erreurs avec rejectWithValue pour les traitements de rejet
+    }
+  }
+);
+export const storeDataInSecureStore = createAsyncThunk(
+  'secureStore/storeData',
+  async ({ key, data }, { rejectWithValue }) => {
+    try {
+      const dataJSON = JSON.stringify(data); // Convertit les données en JSON
+      await SecureStore.setItemAsync(key, dataJSON); // Stocke les données dans Secure Store avec la clé donnée
+      return data;
     } catch (error) {
       return rejectWithValue(error.message); // Gère les erreurs avec rejectWithValue pour les traitements de rejet
     }
   }
 );
 // Fonction pour basculer les favoris
-export const toggleFavorite = createAsyncThunk(
-  'products/toggleFavorite',
-  async (productId, { rejectWithValue }) => {
-    try {
-      const storedProductsJSON = getSecure('AllProducts');
-      let storedProducts = JSON.parse(storedProductsJSON);
-      const updatedProducts = storedProducts.map(product => {
-        if (product.id === productId) {
-          return { ...product, is_favorite: !product.is_favorite };
-        }
-        return product;
-      });
-      await SecureStore.setItemAsync('products', JSON.stringify(updatedProducts));
-      return updatedProducts;
-    } catch (error) {
-      return rejectWithValue(error.message);
-    }
-  }
-);
+// export const toggleFavorite = createAsyncThunk(
+//   'products/toggleFavorite',
+//   async (productId, { rejectWithValue }) => {
+//     try {
+//       const storedProductsJSON = getSecure('AllProducts');
+//       let storedProducts = JSON.parse(storedProductsJSON);
+//       const updatedProducts = storedProducts.map(product => {
+//         if (product.id === productId) {
+//           return { ...product, is_favorite: !product.is_favorite };
+//         }
+//         return product;
+//       });
+//       await SecureStore.setItemAsync('products', JSON.stringify(updatedProducts));
+//       return updatedProducts;
+//     } catch (error) {
+//       return rejectWithValue(error.message);
+//     }
+//   }
+// );
 
 
-export const addToFavorite = createAsyncThunk(
+export const toggleToFavorite = createAsyncThunk(
   'favorite/addToFavorite', 
   async (adId, { rejectWithValue }) => {
     const route = `favorite/addAdToFavorite/${adId}`;
@@ -100,7 +116,6 @@ export const addToCart = createAsyncThunk(
     }
   }
 );
-
 export const getProductsOnCart = createAsyncThunk(
   'favorite/GetFavoritesAd/1/20', 
   async (_, { rejectWithValue }) => {
@@ -117,11 +132,45 @@ export const getProductsOnCart = createAsyncThunk(
     }
   }
 );
-
+export const getListCart = createAsyncThunk(
+  'cart/getUserCart/{page}/{perPage}', 
+  async (_, { rejectWithValue }) => {
+    const route = 'cart/getUserCart/1/20';
+    try {
+      const response = await api.get(route);      
+      console.log('donnés de la carte', response.data);
+      return response.data;
+    } catch (error) {
+      if (error.response) {
+        return rejectWithValue(error.response.data);
+      } else {
+        return rejectWithValue(error.message);
+      }
+    }
+  }
+);
 const ProductSlice = createSlice({
   name: 'products',
   initialState,
   reducers: {
+    incrementQuantity: (state, action) => {
+      const product = state.cart.find(item => item.ad_id === action.payload);
+      if (product) {
+        product.quantity += 1;
+      }
+    },
+    decrementQuantity: (state, action) => {
+      const product = state.cart.find(item => item.ad_id === action.payload);
+      if (product && product.quantity > 1) {
+        product.quantity -= 1;
+      }
+    },
+    resetQuantity: (state, action) => {
+      const product = state.cart.find(item => item.ad_id === action.payload);
+      if (product && product.quantity > 1) {
+        product.quantity = 1;
+      }
+    },
     initialiseData: (state, action) => {
       state.data = null;
     }
@@ -135,22 +184,23 @@ const ProductSlice = createSlice({
       .addCase(getAllProducts.fulfilled, (state, action) => {
         state.isLoading = false;
         state.products = action.payload.data;
-        storeSecure('AllProducts', state.products);
+        // storeSecure('AllProducts', state.products);
       })
       .addCase(getAllProducts.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
         // state.products = action.payload;
       })
-      .addCase(addToFavorite.pending, (state) => {
+      .addCase(toggleToFavorite.pending, (state) => {
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(addToFavorite.fulfilled, (state, action) => {
+      .addCase(toggleToFavorite.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.data = action.payload.data;
+        const wishlist = JSON.stringify(action.payload.data);
+        storeSecure('Wishlist', wishlist)
       })
-      .addCase(addToFavorite.rejected, (state, action) => {
+      .addCase(toggleToFavorite.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
         state.data = action.payload;
@@ -181,22 +231,47 @@ const ProductSlice = createSlice({
         state.error = action.payload;
         state.data = action.payload;
       })
-      .addCase(toggleFavorite.pending, (state) => {
+      .addCase(getListCart.pending, (state) => {
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(toggleFavorite.fulfilled, (state, action) => {
+      .addCase(getListCart.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.products = action.payload;
-        storeSecure('AllProducts', state.products);
+        state.cart = action.payload.data.data;
+        state.total = action.payload.data.total;
       })
-      .addCase(toggleFavorite.rejected, (state, action) => {
+      .addCase(getListCart.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
-      });
+        state.data = action.payload;
+      })
+      .addCase(getDataFromSecureStore.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(getDataFromSecureStore.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.products = action.payload;
+      })
+      .addCase(getDataFromSecureStore.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      .addCase(storeDataInSecureStore.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(storeDataInSecureStore.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.products = action.payload;
+      })
+      .addCase(storeDataInSecureStore.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
   },
 });
 
-export const { initialiseData } = ProductSlice.actions;
+export const { initialiseData, incrementQuantity, decrementQuantity, resetQuantity } = ProductSlice.actions;
 
 export default ProductSlice.reducer;

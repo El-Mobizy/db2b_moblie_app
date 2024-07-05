@@ -11,9 +11,9 @@ const Checkbox = ({ label, onChange, isChecked }) => {
     >
       <View style={styles.checkboxContainer}>
         {isChecked ? (
-          <Ionicons name="checkbox" size={24} color="#D142F5"/>
+          <Ionicons name="checkbox" size={24} color="#7910ff"/>
         ) : (
-          <Ionicons name="square-outline" size={24} color="#D142F5"/>
+          <Ionicons name="square-outline" size={24} color="#7910ff"/>
         )}
       </View>
       <Text style={styles.label}>{label}</Text>

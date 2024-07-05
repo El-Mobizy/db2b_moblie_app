@@ -13,13 +13,7 @@ const AuthLayout = () => {
     <>
       <Stack>
         <Stack.Screen
-          name="sign-in"
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="sign-up"
+          name="auth"
           options={{
             headerShown: false,
           }}
@@ -30,6 +24,7 @@ const AuthLayout = () => {
             headerShown: false,
           }}
         />
+         
       </Stack>
       {/* <Loader isLoading={loading} /> */}
       <StatusBar backgroundColor="#161622" style="light" />

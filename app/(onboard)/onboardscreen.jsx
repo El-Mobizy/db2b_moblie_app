@@ -124,18 +124,17 @@ const onboardscreen = () => {
           </Text>
           {slides[currentSlideIndex].title.split('</Text>')[1]}
         </Text>
-            <Text style={styles.subtitle}>{slides[currentSlideIndex].subtitle}</Text>
+            <Text className="font-rregular" style={styles.subtitle}>{slides[currentSlideIndex].subtitle}</Text>
           </View>
         </View>
-
         {/* Render buttons */}
         <View style={{ marginVertical: 20}}>
           {currentSlideIndex == slides.length - 1 ? (
             <CustomButton
             title="CONTINUE"
-            handlePress={() => router.push("/sign-in")}
+            handlePress={() => router.push("/home")}
             containerStyles="w-full mb-7 min-h-[50px]"
-            textStyles={"text-base font-bold"}
+            textStyles={"text-base font-rbold"}
           />
             // <View style={{ height: 50 }}>
             //   <TouchableOpacity
@@ -160,9 +159,8 @@ const onboardscreen = () => {
                 ]}
                 onPress={skip}>
                 <Text
+                className="text-[15px] font-rbold"
                   style={{
-                    fontWeight: 'bold',
-                    fontSize: 15,
                     color: COLORS.principal,
                   }}>
                   SKIP
@@ -212,12 +210,11 @@ export default onboardscreen;
 const styles = StyleSheet.create({
   subtitle: {
     color: COLORS.secondary,
-    fontSize: 16,
+    fontSize: 15,
     marginTop: 20,
     maxWidth: '90%',
     textAlign: 'center',
     lineHeight: 23,
-    fontWeight: 'light'
   },
   title: {
     color: COLORS.primary,

@@ -10,6 +10,8 @@ import {
 import { router, Link } from 'expo-router';
 import { StyleSheet, Dimensions, TouchableOpacity, View, Text } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { useSelector } from 'react-redux';
+
 const COLORS = {principal: '#7910ff'}
 function clamp(val, min, max) {
   return Math.min(Math.max(val, min), max);
@@ -18,6 +20,7 @@ function clamp(val, min, max) {
 const { width, height } = Dimensions.get('screen');
 
 export default function CartComponent() {
+  const { total } = useSelector(state => state.products);
   const translationX = useSharedValue(0);
   const translationY = useSharedValue(0);
   const prevTranslationX = useSharedValue(0);
@@ -65,7 +68,7 @@ export default function CartComponent() {
           >
             <Icon name="cart" size={30} color="#fff" />
             <View style={styles.notificationBadge}>
-              <Text style={styles.notificationText}>5</Text>
+              <Text style={styles.notificationText}>{total}</Text>
             </View>
           </TouchableOpacity>
         </Animated.View>

@@ -121,30 +121,7 @@ const SignUp = () => {
   };
 
   return (
-    <SafeAreaView className="bg-white h-full">
-      <ScrollView>
-        <View
-          className="w-full flex justify-center h-full px-4 my-6"
-          style={{
-            minHeight: Dimensions.get("window").height - 100,
-          }}
-        >
-          <Image
-            source={images.logocolor}
-            resizeMode="contain"
-            className="w-[200px] mx-auto h-[60px]"
-          />
-          <View className="w-full pt-6">
-            <View className="border flex flex-row items-center rounded-full border-principal">
-              <View className="w-1/2 flex items-center "><Link href="/sign-in"><Text className="text-lg text-center text-principal">Connexion</Text></Link></View>
-              <CustomButton
-                title="Inscription"
-                handlePress={submit}
-                containerStyles=" h-[45px] w-1/2"
-                textStyles={"text-lg"}
-              />
-            </View>
-          </View>
+    <>
           <FormField
           type="mail"
           value={user.email}
@@ -200,9 +177,7 @@ const SignUp = () => {
             textStyles={'text-lg'}
             isLoading={user.isLoading}
           />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+    </>
   );
 };
 

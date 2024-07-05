@@ -4,6 +4,7 @@ import { images, icons } from "../constants";
 import Icon from 'react-native-vector-icons/Ionicons';
 import Checkbox from './Checkbox';
 import { AntDesign } from '@expo/vector-icons';
+import { Swipeable } from 'react-native-gesture-handler';
 import {
     GestureHandlerRootView,
     GestureDetector,
@@ -16,8 +17,25 @@ import Animated, {
     useSharedValue,
     withSpring,
 } from 'react-native-reanimated';
+import { useDispatch, useSelector } from 'react-redux';
+import { incrementQuantity, decrementQuantity } from '../store/features/productSlice';
+const ProductForCard = ({ item, ondelete }) => {
+    const dispatch = useDispatch();
 
-const ProductForCard = () => {
+    const handleIncrement = () => {
+        dispatch(incrementQuantity(item.ad_id));
+    };
+
+    const handleDecrement = () => {
+        if (item.quantity > 1) {
+            dispatch(decrementQuantity(item.ad_id));
+        }
+    };
+    const handleReset = () => {
+        if (item.quantity > 1) {
+            dispatch(decrementQuantity(item.ad_id));
+        }
+    };
     const ICON_SIZE = 15;
     const BUTTON_WIDTH = 100;
     const MAX_SLIDE_OFFSET = BUTTON_WIDTH * 0.3;
@@ -54,11 +72,11 @@ const ProductForCard = () => {
         })
         .onEnd(() => {
             if (translateX.value === MAX_SLIDE_OFFSET) {
-                runOnJS(incrementCount)();
+                runOnJS(handleIncrement)();
             } else if (translateX.value === -MAX_SLIDE_OFFSET) {
-                runOnJS(decrementCount)();
+                runOnJS(handleDecrement)();
             } else if (translateY.value === MAX_SLIDE_OFFSET) {
-                runOnJS(resetCount)();
+                runOnJS(handleReset)();
             }
 
             translateX.value = withSpring(0);
@@ -117,71 +135,90 @@ const ProductForCard = () => {
     }, []);
     const [isChecked, setIsChecked] = useState(false);
 
-  const handleCheckboxChange = () => {
-    setIsChecked(!isChecked);
-  };
-
+    const handleCheckboxChange = () => {
+        setIsChecked(!isChecked);
+    };
+    const renderRightActions = () => (
+        <TouchableOpacity activeOpacity={1} className="bg-red-500 justify-center items-center h-full w-20" >
+            <AntDesign onPress={() => ondelete(item.ad_id)} name="delete" size={20} color="white" />
+        </TouchableOpacity>
+    );
     return (
-        <View className="flex space-x-3 flex-row w-full items-center py-2">
-            <Checkbox
-                isChecked={isChecked}
-                onChange={handleCheckboxChange}
-            />
-            <View className="flex bg-white items-center space-x-2 flex-row ">
-                <Image
-                    className='w-20 h-20 rounded-2xl'
-                    source={images.welcome2}
-                />
-                <View className="h-[55px] flex-col justify-between flex ">
-                    <Text className="font-light text-sm">
-                        Men’s Jacket
-                    </Text>
-                    <Text className="text-base mt-1 text-black font-psemibold">
-                        XOF 10.000
-                    </Text>
-                </View>
-            </View>
-            <GestureHandlerRootView >
-                <GestureDetector gesture={panGesture}>
-                    <Animated.View style={[styles.button, rButtonStyle]}>
-                        <TouchableOpacity className="p-2" onPress={decrementCount}>
-                            <Animated.View style={rPlusMinusIconStyle}>
-                                <Text className="text-xl text-[#D142F5] font-pmedium">-</Text>
-                            </Animated.View>
-                        </TouchableOpacity>
-                        <Animated.View style={rCloseIconStyle}>
-                            <AntDesign name="close" color={'black'} size={ICON_SIZE} />
-                        </Animated.View>
-                        <TouchableOpacity className="p-2 " onPress={incrementCount}>
-                            <Animated.View style={rPlusMinusIconStyle} on>
-                                <Text className="text-xl text-[#D142F5] font-pmedium">+</Text>
-                            </Animated.View>
-                        </TouchableOpacity>
-                        <View
-                            style={{
-                                ...StyleSheet.absoluteFillObject,
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                            }}
-                        >
-                            <Animated.View style={[styles.circle, rStyle]}>
-                                <Text style={styles.countText}>{count}</Text>
-                            </Animated.View>
+        <GestureHandlerRootView className="w-full py-2">
+            <Swipeable renderRightActions={renderRightActions}>
+                <View className="flex bg-white space-x-2 flex-row w-full items-center ">
+                    <Checkbox
+                        color='#7910ff'
+                        isChecked={isChecked}
+                        onChange={handleCheckboxChange}
+                    />
+                    <View className="flex bg-white items-center space-x-2 flex-row ">
+                        <Image
+                            className='w-[70px] h-[70px] rounded-2xl'
+                            source={{ uri: item.image }}
+                        />
+                        <View className=" flex-col justify-between flex ">
+                            <Text className="font-rlight text-sm">
+                                {item.ad_title}
+                            </Text>
+                            <Text className="text-base mt-1 text-black font-rmedium">
+                                XOF {item.final_price}
+                            </Text>
+                            <View className="flex flex-row space-x-2">
+                                <View className="flex border-r pr-2 flex-row space-x-1 justify-center items-center">
+                                    <Text className="font-rlight">Size:</Text>
+                                    <Text className="font-rmedium">L</Text>
+                                </View>
+                                <View className="flex flex-row space-x-1 justify-center items-center">
+                                    <Text className="font-rlight">Color:</Text>
+                                    <View className="w-3 h-3 rounded-full" style={{ backgroundColor: "#7910ff" }}></View>
+                                </View>
+                            </View>
                         </View>
-                    </Animated.View>
-                </GestureDetector>
-            </GestureHandlerRootView>
-        </View>
+                    </View>
+                    <GestureHandlerRootView >
+                        <GestureDetector gesture={panGesture}>
+                            <Animated.View style={[styles.button, rButtonStyle]}>
+                                <TouchableOpacity className="px-2" onPress={handleDecrement}>
+                                    <Animated.View style={rPlusMinusIconStyle}>
+                                        <Text className="text-2xl text-principal font-rmedium">-</Text>
+                                    </Animated.View>
+                                </TouchableOpacity>
+                                <Animated.View style={rCloseIconStyle}>
+                                    <AntDesign name="close" color={'black'} size={ICON_SIZE} />
+                                </Animated.View>
+                                <TouchableOpacity className="px-2" onPress={handleIncrement}>
+                                    <Animated.View style={rPlusMinusIconStyle} on>
+                                        <Text className="text-2xl text-principal font-rmedium">+</Text>
+                                    </Animated.View>
+                                </TouchableOpacity>
+                                <View
+                                    style={{
+                                        ...StyleSheet.absoluteFillObject,
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                    }}
+                                >
+                                    <Animated.View style={[styles.circle, rStyle]}>
+                                        <Text style={styles.countText}>{item.quantity}</Text>
+                                    </Animated.View>
+                                </View>
+                            </Animated.View>
+                        </GestureDetector>
+                    </GestureHandlerRootView>
+                </View>
+            </Swipeable>
+        </GestureHandlerRootView>
     )
 }
 export default ProductForCard
 
 const styles = StyleSheet.create({
     button: {
-        height: 50,
+        height: 45,
         width: 100,
-        backgroundColor: '#d142f525',
-        borderRadius: 10,
+        backgroundColor: '#7910ff20',
+        borderRadius: 5,
         alignItems: 'center',
         justifyContent: 'space-between',
         flexDirection: 'row',
@@ -192,12 +229,20 @@ const styles = StyleSheet.create({
         fontWeight: 'bold'
     },
     circle: {
-        height: 35,
-        width: 35,
-        backgroundColor: '#D142F5',
-        borderRadius: 10,
+        height: 30,
+        width: 30,
+        backgroundColor: '#7910ff',
+        borderRadius: 5,
         position: 'absolute',
         justifyContent: 'center',
         alignItems: 'center',
     },
 });
+
+
+
+
+
+
+
+

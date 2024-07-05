@@ -43,7 +43,7 @@ const CategoryCard = () => {
                     />
                     {/* <Image source={item.category_icone} className={"w-30 h-30"} color={`${item === selected ? '#fff' : '#D142F5'}`} /> */}
                   </View>
-                  <Text className={`${item === selected ? 'text-principal' : 'text-black'} " text-center font-pmedium text-sm mt-2 "`}>{item.title}</Text>
+                  <Text className={`${item === selected ? 'text-principal' : 'text-gray-500'} " text-center font-rmedium text-sm mt-2 "`}>{item.title}</Text>
                 </TouchableOpacity>
               );
             }}

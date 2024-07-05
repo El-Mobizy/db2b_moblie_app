@@ -15,7 +15,7 @@ const axiosInstance = axios.create({
 // Intercepteur pour ajouter le token d'authentification à l'en-tête de la requête
 axiosInstance.interceptors.request.use(
   async config => {
-    const token = getSecure('userToken') // Obtenez le token utilisateur à partir de SecureStore
+    const token = await SecureStore.getItemAsync('userToken') // Obtenez le token utilisateur à partir de SecureStore
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -33,7 +33,9 @@ export default axiosInstance;
 // Fonction pour stocker le token
 const storeSecure = async (name, credentials) => {
     try {
-      await SecureStore.setItemAsync(name, credentials);
+    const response = await SecureStore.setItemAsync(name, credentials);
+                console.log(response);
+return response
     } catch (error) {
       const message = 'Erreur lors de la sauvegarde du' + name + ':'
       console.error(message, error);
@@ -41,7 +43,9 @@ const storeSecure = async (name, credentials) => {
   };
   const getSecure = async (name) => {
     try {
-      await SecureStore.getItemAsync(name);
+     const response = await SecureStore.getItemAsync(name);
+     console.log('Token du user', response);
+      return response
     } catch (error) {
       const message = 'Erreur lors de la sauvegarde du' + name + ':'
       console.error(message, error);

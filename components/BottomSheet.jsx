@@ -14,7 +14,7 @@ import Animated, {
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const MAX_TRANSLATE_Y = -SCREEN_HEIGHT + 50;
 
-const BottomSheet = forwardRef(({ children , isVisible, initial }, ref) => {
+const BottomSheet = forwardRef(({ children , isVisible }, ref) => {
   const translateY = useSharedValue(0);
   const active = useSharedValue(false);
 
@@ -42,9 +42,10 @@ const BottomSheet = forwardRef(({ children , isVisible, initial }, ref) => {
       context.value = { y: translateY.value };
     })
     .onUpdate((event) => {
-      translateY.value = event.translationY + context.value.y;
-      translateY.value = Math.max(translateY.value, MAX_TRANSLATE_Y);
-    })
+      if (event.translationY > 0) {
+         translateY.value = Math.max(event.translationY + context.value.y, MAX_TRANSLATE_Y);
+      }
+    }) 
     .onEnd(() => {
       // if (translateY.value > -SCREEN_HEIGHT / 3) {
       //   scrollTo(0);
@@ -54,12 +55,13 @@ const BottomSheet = forwardRef(({ children , isVisible, initial }, ref) => {
       // }
         if (translateY.value > -SCREEN_HEIGHT / 3) {
           // Si glissé vers le bas suffisamment, le BottomSheet se ferme
-          scrollTo(SCREEN_HEIGHT);
-        } else {
+          scrollTo(0);
+
+        } 
+        else {
           // Dans tous les autres cas, y compris glissé vers le haut, il revient à sa position initiale
           scrollTo(context.value.y);
         }
-      
     });
 
   const rBottomSheetStyle = useAnimatedStyle(() => {
@@ -91,12 +93,13 @@ const BottomSheet = forwardRef(({ children , isVisible, initial }, ref) => {
         style={[styles.backdrop, rBackdropStyle]}
         onTouchStart={() => scrollTo(0)}
       />
-      <GestureDetector gesture={gesture}>
+      <GestureDetector  gesture={gesture}>
         <Animated.View style={[styles.bottomSheetContainer, rBottomSheetStyle]}>
           <View style={styles.line} />
-          <View className="p-4">
-            {children}
+          <View className=" px-4">
+             {children}
           </View>
+           
         </Animated.View>
       </GestureDetector>
     </>
@@ -115,13 +118,12 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: 'white',
     position: 'absolute',
-    top: SCREEN_HEIGHT + 35,
-    borderRadius: 25,
+    top: SCREEN_HEIGHT -15,
   },
   line: {
     width: 75,
     height: 4,
-    backgroundColor: 'grey',
+    backgroundColor: 'rgba(0,0,0,0.4)',
     alignSelf: 'center',
     marginTop: 15,
     borderRadius: 2,
@@ -129,3 +131,4 @@ const styles = StyleSheet.create({
 });
 
 export default BottomSheet;
+

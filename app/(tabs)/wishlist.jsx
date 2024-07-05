@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { View, ScrollView, Alert, Text } from "react-native";
 import { useDispatch, useSelector } from 'react-redux';
-import { getAllFavorites, addToFavorite } from '../../store/features/productSlice';
+import { getDataFromSecureStore } from '../../store/features/productSlice';
 import ProductCard from '../../components/ProductCard';
 import PageTitle from '../../components/PageTitle';
 import Tags from '../../components/Tags';
@@ -19,10 +19,10 @@ const Wishlist = () => {
 
     const handleGetFavorites = async () => {
         try {
-            const response = await dispatch(getAllFavorites()).unwrap();
-            const info = response.data.data;
+            const response = await dispatch(getDataFromSecureStore('Wishlist')).unwrap();
+            const info = response;
             console.log("wishlist",info)
-            setWishlist(Array.isArray(info) ? info : []);
+            setWishlist(info);
         } catch (error) {
             console.error("Erreur lors de la récupération des favoris", error);
         }
