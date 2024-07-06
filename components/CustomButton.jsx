@@ -21,7 +21,6 @@ const CustomButton = ({
       <Text className={`text-white text-center ${textStyles}`}>
         {title}
       </Text>
-
       {isLoading && (
         <ActivityIndicator
           animating={isLoading}

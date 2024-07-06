@@ -116,6 +116,21 @@ export const addToCart = createAsyncThunk(
     }
   }
 );
+export const deleteFromCart = createAsyncThunk(
+  'cart/removeToCart',
+  async (credentials, { rejectWithValue }) => {
+    const route = `cart/removeToCart/${credentials}`;
+    console.log(route);
+    try {
+      const response = await api.delete(route);   
+      console.log("je suis apres la requete");   
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      return rejectWithValue(error.response ? error.response.data : error.message);
+    }
+  }
+);
 export const getProductsOnCart = createAsyncThunk(
   'favorite/GetFavoritesAd/1/20', 
   async (_, { rejectWithValue }) => {
@@ -214,6 +229,19 @@ const ProductSlice = createSlice({
         state.data = action.payload.data;
       })
       .addCase(addToCart.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+        state.data = action.payload;
+      })
+      .addCase(deleteFromCart.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(deleteFromCart.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.data = action.payload.data;
+      })
+      .addCase(deleteFromCart.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
         state.data = action.payload;

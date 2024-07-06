@@ -92,7 +92,9 @@ const Otp = () => {
   const openBottomSheet = () => {    
     console.log('j\'ouvre le bottom sheet'); // Scroll to a position, adjust as needed
     setStatus(true)
-    bottomSheetRef.current.scrollTo(-viewHeight);
+    if (viewHeight > 0 ) {
+      bottomSheetRef.current.scrollTo(-viewHeight)
+  }
   };
   const closeBottomSheet = () => {
     bottomSheetRef.current.scrollTo(0); // Scroll back to top position to close

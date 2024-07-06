@@ -4,7 +4,7 @@ import { View, Text, ScrollView, Dimensions, Alert, Image, TouchableOpacity } fr
 import { images, icons } from "../../constants";
 import { useDispatch, useSelector } from 'react-redux';
 import { CustomButton, FormField } from "../../components";
-import { setEmail, setTelephone, setPassword, setValidation, sendMail, loginUser, blockUser, getUserIpAddress } from '../../store/features/userSlice';
+import { setEmail, setTelephone, setPassword, setIp, setValidation, sendMail, loginUser, blockUser, getUserIpAddress } from '../../store/features/userSlice';
 import * as Network from "expo-network";
 // import { useGlobalContext } from "../../context/GlobalProvider";
 import Modal from '../../components/Modal';
@@ -32,18 +32,13 @@ const SignIn = () => {
   useEffect(() => {
     const getIpAddress = async () => {
       const ip = await Network.getIpAddressAsync();
-      const ipAdress = ip
-      setIpAddress(ipAdress);
-      user.IpAdress = ipAdress
+      console.log('Adresse IP de lutilisateur',ip);
+      setIpAddress(ip);
+      console.log(ipAddress);
+      dispatch(setIp(ip));
     };
     getIpAddress();
-
-    const getNetworkState = async () => {
-      const state = await Network.getNetworkStateAsync();
-      setNetworkState(JSON.stringify(state));
-    };
-    getNetworkState();
-  }, []);
+  }, [ipAddress]);
 
   useEffect(() => {
     // Réinitialise le compteur de tentatives si l'email change

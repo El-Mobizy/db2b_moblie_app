@@ -71,6 +71,11 @@ const Home = ({ handleSwitch, showMenu }) => {
   // };
   handleToggleFavorite = async (adId) => {
     console.log(adId)
+    const item = cart.find(item => item.ad_id === adId);
+
+    if (item && item.is_favorite == true) {
+        
+    } 
     try {
       setLoader(true)
       openModal()

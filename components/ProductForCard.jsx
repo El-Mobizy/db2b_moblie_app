@@ -23,14 +23,14 @@ const ProductForCard = ({ item, ondelete }) => {
     const dispatch = useDispatch();
 
     const handleIncrement = () => {
-        dispatch(incrementQuantity(item.ad_id));
+        dispatch(incrementQuantity(item.ad_id));  
     };
 
     const handleDecrement = () => {
         if (item.quantity > 1) {
-            dispatch(decrementQuantity(item.ad_id));
+            dispatch(decrementQuantity(item.ad_id));  
         }
-    };
+    };  
     const handleReset = () => {
         if (item.quantity > 1) {
             dispatch(decrementQuantity(item.ad_id));
@@ -139,9 +139,11 @@ const ProductForCard = ({ item, ondelete }) => {
         setIsChecked(!isChecked);
     };
     const renderRightActions = () => (
-        <TouchableOpacity activeOpacity={1} className="bg-red-500 justify-center items-center h-full w-20" >
-            <AntDesign onPress={() => ondelete(item.ad_id)} name="delete" size={20} color="white" />
-        </TouchableOpacity>
+        <View className="bg-red-500 justify-center items-center h-full w-20" >
+            <TouchableOpacity activeOpacity={1} onPress={() => ondelete(item.ad_id)} className="p-4">
+                <AntDesign name="delete" size={20} color="white" />
+            </TouchableOpacity>
+        </View>
     );
     return (
         <GestureHandlerRootView className="w-full py-2">

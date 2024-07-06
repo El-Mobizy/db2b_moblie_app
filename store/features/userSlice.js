@@ -39,7 +39,7 @@ export const loginUser = createAsyncThunk(
   async (datalogin, { rejectWithValue }) => {
     try {
       const response = await api.post('/users/login', datalogin);
-      console.log("je suis apres la fonction")
+      console.log("je suis apres la fonction", response.data)
       return response.data;  
     } catch (error) {
       console.log(error);
@@ -120,6 +120,9 @@ const userSlice = createSlice({
       state.password = action.payload;
       state.password_confirmation = action.payload 
     },
+    setIp: (state, action) => {
+      state.IpAdress = action.payload;
+    },
     setValidation: (state, action) => {
       state.isValid[action.payload.field] = action.payload.isValid;
     },
@@ -198,6 +201,6 @@ const userSlice = createSlice({
   },
 });
 
-export const { setEmail, setTelephone, setPassword, initialiseData, setValidation } = userSlice.actions;
+export const { setEmail, setTelephone, setPassword, setIp, initialiseData, setValidation } = userSlice.actions;
 
 export default userSlice.reducer;
