@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Link, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { View, Text, ScrollView, Dimensions, Alert, Image } from "react-native";
+import { View, Text, ScrollView, Dimensions, Alert, Image, TouchableOpacity } from "react-native";
 import { useDispatch, useSelector } from 'react-redux';
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import { images } from "../../constants";
@@ -9,12 +9,18 @@ import { register } from "../../lib/functions";
 import { CustomButton, FormField } from "../../components";
 import { setEmail, setTelephone, setPassword, setValidation, initialiseData, signUpUser } from '../../store/features/userSlice';
 // import { useGlobalContext } from "../../context/GlobalProvider";
+import Modal from '../../components/Modal';
+
 
 const SignUp = () => {
   //   const { setUser, setIsLogged } = useGlobalContext();
   const dispatch = useDispatch();
+  const modalRef = useRef(null);
   const user = useSelector(state => state.user);
-
+  const [title, setTitle] = useState('');
+  const [message, setMessage] = useState('');
+  const [isSubmitting, setSubmitting] = useState(false);
+  const [isChecked, setIsChecked] = useState(true);
   const handleInputChange = (name, value) => {
     if (name === 'email') {
       dispatch(setEmail(value));
@@ -23,6 +29,12 @@ const SignUp = () => {
     } else if (name === 'password') {
       dispatch(setPassword(value));
     }
+  };
+  const openModal = () => {
+    modalRef.current.handleOpenModal();
+  };
+  const closeModal = () => {
+    modalRef.current.handleCloseModal();
   };
   const handleValidationChange = (field, isValid) => {
     dispatch(setValidation({ field, isValid }));
@@ -36,6 +48,7 @@ const SignUp = () => {
   
     if (user.isValid.mail && user.isValid.number && user.isValid.password && isChecked) {
       setSubmitting(true);
+      openModal()
       try {
         const response = await dispatch(signUpUser(user)).unwrap();
         console.log('Requête terminée');
@@ -50,32 +63,45 @@ const SignUp = () => {
   
           if (totalErrors <= 1) {
             if (info.errors.phone) {
-              Alert.alert(info.message, info.errors.phone[0]);
+              setTitle("Error !")
+              setMessage(info.message, info.errors.phone[0])
+              // Alert.alert(info.message, info.errors.phone[0]);
             }
             if (info.errors.email) {
-              Alert.alert(info.message, info.errors.email[0]);
+              setTitle("Error !")
+              setMessage(info.message, info.errors.email[0])
+              // Alert.alert(info.message, info.errors.email[0]);
             }
             if (info.errors.password) {
-              Alert.alert(info.message, info.errors.password[0]);
+              setTitle("Error !")
+              setMessage(info.message, info.errors.password[0])
+              // Alert.alert(info.message, info.errors.password[0]);
             }
           } else {
             const errorMessages = Object.keys(info.errors).map(key => {
               return `\n${info.errors[key].join(', ')}`;
             }).join('\n');
-            Alert.alert(info.message, errorMessages);
+            setTitle("Error !")
+            setMessage(info.message, errorMessages)
+            // Alert.alert(info.message, errorMessages);
           }
         } else {
-          Alert.alert("Success", info.message);
+          // Alert.alert("Success", info.message);
+          setTitle("Success !")
+          setMessage(info.message)
+          setSubmitting(false)
           setTimeout(() => {
-            setEmail('')
-            setPassword('')
-            setTelephone('')
-            setSubmitting(false);
-            router.replace("/sign-in");
+          setEmail('')
+          setPassword('')
+          setTelephone('')
+          setSubmitting(false);
+          router.replace("/auth");
           }, 3000);
         }
       } catch (error) {
-        Alert.alert("Erreur", error.message || "Une erreur est survenue lors de l'inscription");
+        setTitle("Error !")
+            setMessage(info.message, error.message || "Une erreur est survenue lors de l'inscription")
+        // Alert.alert("Erreur", error.message || "Une erreur est survenue lors de l'inscription");
       } finally {
         setSubmitting(false);
       }
@@ -84,11 +110,6 @@ const SignUp = () => {
       setSubmitting(false);
     }
   };
-  
-  
-  const [isSubmitting, setSubmitting] = useState(false);
-  const [isChecked, setIsChecked] = useState(true);
-
   const handleCheckBoxChange = () => {
     setIsChecked(!isChecked);
   };
@@ -177,6 +198,20 @@ const SignUp = () => {
             textStyles={'text-lg'}
             isLoading={user.isLoading}
           />
+          <Modal isLoading={isSubmitting} ref={modalRef}>
+        <View className="flex items-center">
+          <Text className="text-xl text-center font-rmedium mb-4 text-black">{title}</Text>
+          <Image
+            source={`${title === "Success !" ? images.success : images.error}`}
+            resizeMode='contain'
+            className={`${title != "Success !" ? 'w-[100px] h-[50px]' : 'w-[200px] h-[70px]'}`}
+          />
+          <Text className="text-base text-center my-4 text-gray-500 font-rmedium" >{message || 'An error occured. Please, try again later'}</Text>
+          <TouchableOpacity className={`${title === "Success !" ? 'bg-green-500' : "bg-red-500"} py-2 px-6 rounded-md text-white`} onPress={closeModal}>
+            <Text className="text-white font-bold">Fermer</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </>
   );
 };

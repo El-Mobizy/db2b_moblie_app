@@ -18,22 +18,22 @@ import Animated, {
     withSpring,
 } from 'react-native-reanimated';
 import { useDispatch, useSelector } from 'react-redux';
-import { incrementQuantity, decrementQuantity } from '../store/features/productSlice';
+import { incrementQuantity, decrementQuantity } from '../store/features/cartSlice';
 const ProductForCard = ({ item, ondelete }) => {
     const dispatch = useDispatch();
 
     const handleIncrement = () => {
-        dispatch(incrementQuantity(item.ad_id));  
+        dispatch(incrementQuantity(item.id));  
     };
 
     const handleDecrement = () => {
         if (item.quantity > 1) {
-            dispatch(decrementQuantity(item.ad_id));  
+            dispatch(decrementQuantity(item.id));  
         }
     };  
     const handleReset = () => {
         if (item.quantity > 1) {
-            dispatch(decrementQuantity(item.ad_id));
+            dispatch(decrementQuantity(item.id));
         }
     };
     const ICON_SIZE = 15;
@@ -140,7 +140,7 @@ const ProductForCard = ({ item, ondelete }) => {
     };
     const renderRightActions = () => (
         <View className="bg-red-500 justify-center items-center h-full w-20" >
-            <TouchableOpacity activeOpacity={1} onPress={() => ondelete(item.ad_id)} className="p-4">
+            <TouchableOpacity activeOpacity={1} onPress={() => ondelete(item.id)} className="p-4">
                 <AntDesign name="delete" size={20} color="white" />
             </TouchableOpacity>
         </View>
@@ -157,14 +157,14 @@ const ProductForCard = ({ item, ondelete }) => {
                     <View className="flex bg-white items-center space-x-2 flex-row ">
                         <Image
                             className='w-[70px] h-[70px] rounded-2xl'
-                            source={{ uri: item.image }}
+                            source={{ uri: item?.image }}
                         />
                         <View className=" flex-col justify-between flex ">
                             <Text className="font-rlight text-sm">
-                                {item.ad_title}
+                                {item?.title}
                             </Text>
                             <Text className="text-base mt-1 text-black font-rmedium">
-                                XOF {item.final_price}
+                                XOF {item?.final_price}
                             </Text>
                             <View className="flex flex-row space-x-2">
                                 <View className="flex border-r pr-2 flex-row space-x-1 justify-center items-center">
@@ -202,7 +202,7 @@ const ProductForCard = ({ item, ondelete }) => {
                                     }}
                                 >
                                     <Animated.View style={[styles.circle, rStyle]}>
-                                        <Text style={styles.countText}>{item.quantity}</Text>
+                                        <Text style={styles.countText}>{item?.quantity}</Text>
                                     </Animated.View>
                                 </View>
                             </Animated.View>

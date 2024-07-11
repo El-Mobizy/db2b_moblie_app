@@ -2,7 +2,7 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 const baseURL = 'http://192.168.100.159:8001/api/'; // Remplacez cela par l'URL de votre API
-
+// const baseURL = 'http://db2bapi.esgt-benin.com/api/';
 const axiosInstance = axios.create({
   baseURL,
   timeout: 10000, // Durée d'attente maximale de 10 secondes pour les requêtes

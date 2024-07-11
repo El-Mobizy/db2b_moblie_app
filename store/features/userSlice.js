@@ -106,6 +106,7 @@ export const getNewCode = createAsyncThunk(
     }
   }
 );
+
 const userSlice = createSlice({
   name: 'user',
   initialState,

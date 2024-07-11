@@ -36,8 +36,9 @@ const ProductCard = ({ item, handleProductClick, toggleFavorite, addProductToCar
           
             <View className="bg-white absolute z-50 -bottom-6  h-[60px] w-[60px] flex rounded-full justify-center items-center">
               <TouchableOpacity
+              activeOpacity={0.9}
               onPress={() => {
-                addProductToCart(item.id);
+                addProductToCart(item);
               }}
             >
               <View className="bg-principal h-[50px] w-[50px] flex rounded-full justify-center items-center">

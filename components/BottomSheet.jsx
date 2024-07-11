@@ -14,7 +14,7 @@ import Animated, {
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const MAX_TRANSLATE_Y = -SCREEN_HEIGHT + 50;
 
-const BottomSheet = forwardRef(({ children , isVisible }, ref) => {
+const BottomSheet = forwardRef(({ children, isVisible, height }, ref) => {
   const translateY = useSharedValue(0);
   const active = useSharedValue(false);
 
@@ -33,13 +33,14 @@ const BottomSheet = forwardRef(({ children , isVisible }, ref) => {
     } else {
       scrollTo(SCREEN_HEIGHT);
     }
-  }, [isVisible]);
+    console.log('la hauteur recuperé', height);
+  }, [isVisible, height]);
 
   const context = useSharedValue({ y: 0 });
 
   const gesture = Gesture.Pan()
     .onStart(() => {
-      context.value = { y: translateY.value };
+      context.value = { y: translateY.value};
     })
     .onUpdate((event) => {
       if (event.translationY > 0) {
@@ -110,15 +111,16 @@ const styles = StyleSheet.create({
   container: {
     ...StyleSheet.absoluteFillObject,
   },
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-  },
   bottomSheetContainer: {
     width: '100%',
     backgroundColor: 'white',
     position: 'absolute',
-    top: SCREEN_HEIGHT -15,
+    top: SCREEN_HEIGHT + 35,
+    borderRadius: 25,
+  },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.4)',
   },
   line: {
     width: 75,

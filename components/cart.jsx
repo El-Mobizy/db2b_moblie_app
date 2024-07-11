@@ -20,7 +20,7 @@ function clamp(val, min, max) {
 const { width, height } = Dimensions.get('screen');
 
 export default function CartComponent() {
-  const { total } = useSelector(state => state.products);
+  const { cart } = useSelector(state => state.cart);
   const translationX = useSharedValue(0);
   const translationY = useSharedValue(0);
   const prevTranslationX = useSharedValue(0);
@@ -64,11 +64,11 @@ export default function CartComponent() {
         <Animated.View style={[animatedStyles, styles.button]}>
           <TouchableOpacity
           onPress={() => router.push("/cart")}
-          activeOpacity={0.7}
+          activeOpacity={0.9}
           >
             <Icon name="cart" size={30} color="#fff" />
             <View style={styles.notificationBadge}>
-              <Text style={styles.notificationText}>{total}</Text>
+              <Text style={styles.notificationText}>{cart?.length || 0}</Text>
             </View>
           </TouchableOpacity>
         </Animated.View>
