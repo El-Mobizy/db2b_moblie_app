@@ -39,11 +39,12 @@ const Otp = () => {
     const { height } = event.nativeEvent.layout;
     setViewHeight(height);
     console.log('Content Height:', viewHeight);
-    if (bottomSheetRef.current) {
-      bottomSheetRef.current.scrollTo(-(height));
-    }
   };
-
+  useEffect(() => {
+    if (bottomSheetRef.current) {
+        bottomSheetRef.current.scrollTo(-(viewHeight + 20));
+      }
+}, [viewHeight]);
   const handleSendCode = async () => {
     console.log(isfilled);
     console.log(otp);
@@ -64,9 +65,9 @@ const Otp = () => {
           setSubmitting(false);
           setIscodevalid(true)
           openBottomSheet()
-          setTimeout(() => {
-            router.replace('/home')
-          }, 1000);
+          // setTimeout(() => {
+          //   router.replace('/home')
+          // }, 1000);
         }
         else if (info.message == 'Code invalid') {
           closeModal()
@@ -173,7 +174,7 @@ const Otp = () => {
         </View>
       </ScrollView>
       {status &&
-        <BottomSheet ref={bottomSheetRef} isVisible={isVisible}>
+        <BottomSheet ref={bottomSheetRef} isVisible={isVisible} height={viewHeight}>
            <View onLayout={handleLayout} className="flex justify-center w-full  h-fit py-12 items-center flex-col mx-auto">
              <View className={`w-32 h-32 flex justify-center mx-auto items-center rounded-full ${iscodevalid ? 'bg-[#319F4333]' : 'bg-[#E3362933]'}`}>
             <View className={`w-24 h-24 ${iscodevalid ? 'bg-[#319F43B3]' : 'bg-[#E33629B3]'} flex justify-center items-center rounded-full`}>
@@ -189,8 +190,8 @@ const Otp = () => {
           {iscodevalid && <Text className="font-rlight text-base text-center my-6">Congratulation <Text className=" pl-2 font-rmedium">{user.email}</Text> You have successfully login into your account.</Text>}
           {!iscodevalid && <Pressable
             // onPress={handlePress}
-            activeOpacity={0.7}
-            className={`bg-[#E33629B3] w-full rounded-full h-[56px] shadow-xl flex flex-row justify-center items-center`}
+            activeOpacity={0.85}
+            className={`bg-[#E33629B3] w-full rounded-full h-[50px] shadow-xl flex flex-row justify-center items-center`}
           >
             <Text className={`text-white font-rmedium text-lg text-center font-normal`}>
              Resend code
@@ -207,9 +208,8 @@ const Otp = () => {
           {iscodevalid && 
           <Pressable
           onPress={() => {router.push("/home")} }
-          activeOpacity={0.7}
+          activeOpacity={0.85}
           className={`bg-[#319F43B3] rounded-full w-full h-[50px] shadow-xl flex flex-row justify-center items-center`}
-
         >
           <Text className={`text-white font-rmedium text-lg text-center font-normal`}>
            Go to home

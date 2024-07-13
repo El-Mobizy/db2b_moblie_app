@@ -31,7 +31,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getAllProducts, toggleToFavorite, addToCart } from '../../store/features/productSlice';
 import { useNavigation } from "@react-navigation/native";
 import Modal from '../../components/Modal'; 
-
 const Home = ({ handleSwitch, showMenu }) => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
@@ -69,13 +68,13 @@ const Home = ({ handleSwitch, showMenu }) => {
   //       setMessage("An error occured. Please, try again later")
   //     });
   // };
-  handleToggleFavorite = async (adId) => {
+ const handleToggleFavorite = async (adId) => {
     console.log(adId)
-    const item = cart.find(item => item.ad_id === adId);
+    // const item = cart.find(item => item.ad_id === adId);
 
-    if (item && item.is_favorite == true) {
+    // if (item && item.is_favorite == true) {
         
-    } 
+    // } 
     try {
       setLoader(true)
       openModal()
