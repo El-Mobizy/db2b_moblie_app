@@ -4,6 +4,7 @@ import * as SecureStore from 'expo-secure-store';
 
 const initialState = { 
   products: [],
+  wishlist: [],
   cart: [],
   total: null,
   error: "",
@@ -69,7 +70,22 @@ export const storeDataInSecureStore = createAsyncThunk(
 //   }
 // );
 
-
+export const getAdDetails = createAsyncThunk(
+  'ad/getAdDetail/{adUid}',
+  async ( adUid, { rejectWithValue }) => {
+    const route = `ad/getAdDetail/${adUid}`;
+    try {
+      const response = await api.get(route);      
+      return response.data;
+    } catch (error) {
+      if (error.response) {
+        return rejectWithValue(error.response.data);
+      } else {
+        return rejectWithValue(error.message);
+      }
+    }
+  }
+)
 export const toggleToFavorite = createAsyncThunk(
   'favorite/addToFavorite', 
   async (adId, { rejectWithValue }) => {
@@ -93,67 +109,6 @@ export const getAllFavorites = createAsyncThunk(
     const route = 'favorite/GetFavoritesAd/1/20';
     try {
       const response = await api.get(route);      
-      return response.data;
-    } catch (error) {
-      if (error.response) {
-        return rejectWithValue(error.response.data);
-      } else {
-        return rejectWithValue(error.message);
-      }
-    }
-  }
-);
-
-export const addToCart = createAsyncThunk(
-  'cart/addToCart',
-  async (credentials, { rejectWithValue }) => {
-    const route = `cart/addToCart/${credentials}`;
-    try {
-      const response = await api.post(route);      
-      return response.data;
-    } catch (error) {
-      return rejectWithValue(error.response ? error.response.data : error.message);
-    }
-  }
-);
-export const deleteFromCart = createAsyncThunk(
-  'cart/removeToCart',
-  async (credentials, { rejectWithValue }) => {
-    const route = `cart/removeToCart/${credentials}`;
-    console.log(route);
-    try {
-      const response = await api.delete(route);   
-      console.log("je suis apres la requete");   
-      return response.data;
-    } catch (error) {
-      console.log(error);
-      return rejectWithValue(error.response ? error.response.data : error.message);
-    }
-  }
-);
-export const getProductsOnCart = createAsyncThunk(
-  'favorite/GetFavoritesAd/1/20', 
-  async (_, { rejectWithValue }) => {
-    const route = 'favorite/GetFavoritesAd/1/20';
-    try {
-      const response = await api.get(route);      
-      return response.data;
-    } catch (error) {
-      if (error.response) {
-        return rejectWithValue(error.response.data);
-      } else {
-        return rejectWithValue(error.message);
-      }
-    }
-  }
-);
-export const getListCart = createAsyncThunk(
-  'cart/getUserCart/{page}/{perPage}', 
-  async (_, { rejectWithValue }) => {
-    const route = 'cart/getUserCart/1/20';
-    try {
-      const response = await api.get(route);      
-      console.log('donnés de la carte', response.data);
       return response.data;
     } catch (error) {
       if (error.response) {
@@ -212,36 +167,22 @@ const ProductSlice = createSlice({
       })
       .addCase(toggleToFavorite.fulfilled, (state, action) => {
         state.isLoading = false;
-        const wishlist = JSON.stringify(action.payload.data);
-        storeSecure('Wishlist', wishlist)
+        state.wishlist= action.payload.data;
       })
       .addCase(toggleToFavorite.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
         state.data = action.payload;
       })
-      .addCase(addToCart.pending, (state) => {
+      .addCase(getAdDetails.pending, (state) => {
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(addToCart.fulfilled, (state, action) => {
+      .addCase(getAdDetails.fulfilled, (state, action) => {
         state.isLoading = false;
         state.data = action.payload.data;
       })
-      .addCase(addToCart.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload;
-        state.data = action.payload;
-      })
-      .addCase(deleteFromCart.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(deleteFromCart.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.data = action.payload.data;
-      })
-      .addCase(deleteFromCart.rejected, (state, action) => {
+      .addCase(getAdDetails.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
         state.data = action.payload;
@@ -252,23 +193,9 @@ const ProductSlice = createSlice({
       })
       .addCase(getAllFavorites.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.data = action.payload.data;
+        state.wishlist = action.payload.data;
       })
       .addCase(getAllFavorites.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload;
-        state.data = action.payload;
-      })
-      .addCase(getListCart.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(getListCart.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.cart = action.payload.data.data;
-        state.total = action.payload.data.total;
-      })
-      .addCase(getListCart.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
         state.data = action.payload;

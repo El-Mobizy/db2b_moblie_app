@@ -1,20 +1,26 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import CustomBottomSheet from '../../components/CustomBottomSheet';
+import { StyleSheet, Text, View, Button } from 'react-native';
+import { BottomSheetProvider, useBottomSheet } from '../../components/CustomBottomSheet';
 
-const App = () => {
-  const snapPoints = ['25%', '50%', '90%'];
-
-  const renderContent = () => (
-    <View style={styles.contentContainer}>
-      <Text>Awesome 🎉</Text>
-    </View>
-  );
+const ChildComponent = () => {
+  const { openBottomSheet } = useBottomSheet();
 
   return (
     <View style={styles.container}>
-      <CustomBottomSheet snapPoints={snapPoints} renderContent={renderContent} />
+      <Text style={styles.title}>Child Component</Text>
+      <Button title="Open Bottom Sheet" onPress={openBottomSheet} />
     </View>
+  );
+};
+
+const App = () => {
+  return (
+    <BottomSheetProvider snapPoints={['25%', '50%', '75%']}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Parent Component</Text>
+        <ChildComponent />
+      </View>
+    </BottomSheetProvider>
   );
 };
 
@@ -22,11 +28,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    backgroundColor: 'grey',
-  },
-  contentContainer: {
-    flex: 1,
     alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
   },
 });
 

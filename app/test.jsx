@@ -1,74 +1,77 @@
-import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, Pressable } from 'react-native';
 
-const BottomSheet = ({ children, setStatus }) => {
-  const slide = useRef(new Animated.Value((400))).current;
 
-  const slideUp = () => {
-    // Slide up the bottom sheet
-    Animated.timing(slide, {
-      toValue: 0,
-      duration: 1200,
-      useNativeDriver: true,
-    }).start();
-  };
 
-  const slideDown = () => {
-    // Slide down the bottom sheet
-    Animated.timing(slide, {
-      toValue: 600,
-      duration: 1200,
-      useNativeDriver: true,
-    }).start();
-  };
-  useEffect(() => {
-    slideUp();
-  }, []);
+import { Skeleton } from 'moti/skeleton';
+import { Text, View, StyleSheet } from 'react-native';
+import Animated, { FadeIn, Layout } from 'react-native-reanimated';
 
-  const closeModal = () => {
-    slideDown();
-    setTimeout(() => {
-      setStatus(false);
-    }, 1000);
-  };
 
+
+const ContactListItem = ({ contact }) => {
   return (
-    <Pressable onPress={closeModal} style={styles.backdrop}>
-      <Pressable style={{ width: '100%', height: '60%' }}>
-        <Animated.View style={[styles.bottomSheet, { transform: [{ translateY: slide }] }]}>
-            <View className="bg-gray-300 h-1 rounded-md w-1/3 mx-auto"></View>
-          <View style={styles.content}>
-            {children}
-          </View>
-        </Animated.View>
-      </Pressable>
-    </Pressable>
-    
+    <View style={styles.container}>
+      {/* If contact == null -> list is loading */}
+      <Skeleton.Group show={contact == null}>
+        <Skeleton
+          height={70}
+          width={70}
+          radius={'round'}
+          {...SkeletonCommonProps}>
+          {contact && (
+            <Animated.View
+              layout={Layout}
+              entering={FadeIn.duration(1500)}
+              style={styles.circleContainer}>
+              <Text style={{ fontSize: 25, color: 'white' }}>
+                {contact.name?.[0]}
+              </Text>
+            </Animated.View>
+          )}
+        </Skeleton>
+        <View style={{ marginLeft: 15 }}>
+          <Skeleton height={30} width={'80%'} {...SkeletonCommonProps}>
+            {contact && (
+              <Animated.Text
+                layout={Layout}
+                entering={FadeIn.duration(1500)}
+                style={{ fontSize: 25 }}>
+                {contact.name}
+              </Animated.Text>
+            )}
+          </Skeleton>
+          <View style={{ height: 5 }} />
+          <Skeleton height={25} width={'70%'} {...SkeletonCommonProps}>
+            {contact && (
+              <Animated.Text
+                layout={Layout}
+                entering={FadeIn.duration(1500)}
+                style={{ fontSize: 20 }}>
+                {contact.email}
+              </Animated.Text>
+            )}
+          </Skeleton>
+        </View>
+      </Skeleton.Group>
+    </View>
   );
 };
-export default BottomSheet;
 
 const styles = StyleSheet.create({
-  backdrop: {
-    position: 'absolute',
-    flex: 1,
-    top: 0,
-    left: 0,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+  container: {
     width: '100%',
-    height: '100%',
-    justifyContent: 'flex-end'
+    height: 120,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
   },
-  bottomSheet: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'white',
-    borderTopRightRadius: 20,
-    borderTopLeftRadius: 20,
-    paddingHorizontal: 15,
-    paddingVertical: 15
-  },
-  content: {
-    marginTop: 20
+  circleContainer: {
+    height: 70,
+    aspectRatio: 1,
+    backgroundColor: '#005CB7',
+    borderRadius: 35,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
+
+export default ContactListItem;

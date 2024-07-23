@@ -32,7 +32,7 @@
 //           </TouchableOpacity>
 //       </View>
 //     </View>
-      
+
 //     </>
 //   );
 // };
@@ -43,78 +43,186 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
-  View, Text, Image, ScrollView, TouchableOpacity, StyleSheet, 
-  Dimensions, StatusBar, Animated, FlatList
+  View, Text, Image, ScrollView, TouchableOpacity, StyleSheet,
+  Dimensions, StatusBar, FlatList, Animated,
+  ActivityIndicator
 } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as Animatable from 'react-native-animatable';
-import BottomSheet, {BottomSheetScrollView} from '@gorhom/bottom-sheet';
-import Animated, {
+import { useDispatch, useSelector } from 'react-redux';
+import { getAdDetails, toggleToFavorite } from '../../store/features/productSlice';
+import { addToCart } from '../../store/features/cartSlice'
+import { images, icons } from "../../constants";
+import Modal from '../../components/Modal'; 
+import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import { Skeleton } from 'moti/skeleton';
+import Reanimated, {
   Extrapolation,
   interpolate,
   interpolateColor,
   useAnimatedStyle,
   useSharedValue,
+  FadeIn,
+  LinearTransition
 } from 'react-native-reanimated';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
-
+import AwesomeIcon from 'react-native-vector-icons/FontAwesome';
 const { width } = Dimensions.get('window');
- const images = [
-    {
-      "id": 1,
-      "url": "https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0"
-    },
-    {
-      "id": 2,
-      "url": "https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0"
-    },
-    {
-      "id": 3,
-      "url": "https://images.unsplash.com/photo-1444044205806-38f3ed106c10"
-    },
-    {
-      "id": 4,
-      "url": "https://images.unsplash.com/photo-1465101162946-4377e57745c3"
-    },
-    {
-      "id": 5,
-      "url": "https://images.unsplash.com/photo-1493815793586-f8d9b22b4e8c"
-    },
-    {
-      "id": 6,
-      "url": "https://images.unsplash.com/photo-1470115636492-6d2b56b9fb26"
-    },
-    {
-      "id": 7,
-      "url": "https://images.unsplash.com/photo-1431440869543-efaf3388c585"
-    },
-    {
-      "id": 8,
-      "url": "https://images.unsplash.com/photo-1434056886845-dac89ffe9b56"
-    },
-    {
-      "id": 9,
-      "url": "https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0"
-    },
-    {
-      "id": 10,
-      "url": "https://images.unsplash.com/photo-1493815793586-f8d9b22b4e8c"
+// const images = [
+//   {
+//     "id": 1,
+//     "url": "https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0"
+//   },
+//   {
+//     "id": 2,
+//     "url": "https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0"
+//   },
+//   {
+//     "id": 3,
+//     "url": "https://images.unsplash.com/photo-1444044205806-38f3ed106c10"
+//   },
+//   {
+//     "id": 4,
+//     "url": "https://images.unsplash.com/photo-1465101162946-4377e57745c3"
+//   },
+//   {
+//     "id": 5,
+//     "url": "https://images.unsplash.com/photo-1493815793586-f8d9b22b4e8c"
+//   },
+//   {
+//     "id": 6,
+//     "url": "https://images.unsplash.com/photo-1470115636492-6d2b56b9fb26"
+//   },
+//   {
+//     "id": 7,
+//     "url": "https://images.unsplash.com/photo-1431440869543-efaf3388c585"
+//   },
+//   {
+//     "id": 8,
+//     "url": "https://images.unsplash.com/photo-1434056886845-dac89ffe9b56"
+//   },
+//   {
+//     "id": 9,
+//     "url": "https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0"
+//   },
+//   {
+//     "id": 10,
+//     "url": "https://images.unsplash.com/photo-1493815793586-f8d9b22b4e8c"
+//   }
+// ]
+const SkeletonCommonProps = {
+  colorMode: 'light',
+  transition: {
+    type: 'timing',
+    duration: 1500,
+  },
+  backgroundColor: '#D4D4D4',
+};
+const details = () => {
+  const dispatch = useDispatch();
+  const [loader, setLoader] = useState(true);
+  const [details, setDetails] = useState({});
+  const [title, setTitle] = useState('');
+  const [message, setMessage] = useState('');
+  const modalRef = useRef(null);
+  const l = Object.entries(details).length;
+  const files = details.files;
+  useEffect(() => {
+    console.log('Ce que jai pris', parsedUid);
+    handleGetDetails(parsedUid);
+    if (l > 0 && loader === true) {
+      console.log('inhin');
+      setLoader(false)
     }
-  ]
+    StatusBar.setBarStyle('light-content');
+    return () => {
+      StatusBar.setBarStyle('default');
+    };
 
-const ProductScreen = ({ navigation }) => {
+  },
+    [dispatch, uid, l])
+  const { uid } = useLocalSearchParams();
+  const parsedUid = JSON.parse(uid);
+  const handleGetDetails = async (adUid) => {
+    console.log(adUid)
+    console.log('je suis pas dans try');
+    try {
+      console.log('je suis au tout debut');
+      console.log('je suis au moins dedans');
+      const response = await dispatch(getAdDetails(adUid)).unwrap();
+      console.log('Requête terminée');
+      const detail = response.data[0]
+      setDetails(detail)
+      console.log('details du produit', details);
+      // setLoader(false)
+    } catch (error) {
+      // setLoader(false)
+      console.log('je suis dans le bloc error', Error);
+    } finally {
+      // setLoader(false)
+    }
+  };
+ const handleAddToCart = (item) => {
+    const cartItem = {
+        "id": item.ad_id,
+        "category_title": item.category_title,
+        "title" : item.title,
+        "final_price": item.final_price,
+        "image": item.image,
+        "issynchronized" : item.issynchronized,
+        "quantity" : null
+    }
+    console.log('donneés à envoyer pour lajout a la carte', cartItem)
+    dispatch(addToCart(cartItem));
+    openModal()
+    setTitle("Success !")
+    setMessage('Ad added to cart successfully')
+  };
+  const handleToggleFavorite = async (adId) => {
+    console.log(adId)
+    // const item = cart.find(item => item.ad_id === adId);
+
+    // if (item && item.is_favorite == true) {
+        
+    // } 
+    try {
+      setLoader(true)
+      openModal()
+      const response = await dispatch(toggleToFavorite(adId)).unwrap();
+      console.log('Requête terminée');
+      const wislist = response.data
+      console.log('liste des favoris', wislist);
+      const info = response?.message ?? "An error occured. Please, try again later";
+      if (info) {
+        setLoader(false)
+      }
+      if ( info && info === "Product added to wishlist successfully !" || "Product retrieve from wishlist successfully !") {
+          setTitle("Success !")
+          setMessage(info)
+      }
+      else{
+        setTitle("Error !")
+        setMessage(info)
+      }
+    } catch (error) {
+    } finally {
+    }
+  };
+  const openModal = () => {
+    modalRef.current.handleOpenModal();
+  };
+  const closeModal = () => {
+    modalRef.current.handleCloseModal();
+  };
   const [activeIndex, setActiveIndex] = useState(0)
 
   // const [selectedSize, setSelectedSize] = useState('XL');
   // const [selectedColor, setSelectedColor] = useState('red');
-  const [expanded, setExpanded] = useState(false);
   const [scrollY] = useState(new Animated.Value(0));
 
-  const sizes = ['S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
-  const colors = ['red', 'green', 'yellow', 'purple', 'blue'];
-  const [selectedSize, setSelectedSize] = useState("M");
-  const [selectedColor, setSelectedColor] = useState("#B11D1D");
+
   const thumbnails = [
     { id: 1, uri: 'http://192.168.100.159:8001/image/ad/6687e09711264.jpeg' },
     { id: 2, uri: 'http://192.168.100.159:8001/image/ad/6687e09711264.jpeg' },
@@ -142,26 +250,32 @@ const ProductScreen = ({ navigation }) => {
   const scrollToActiveIndex = (index) => {
     setActiveIndex(index)
     topRef?.current?.scrollToOffset({
-      offset: index * width ,
+      offset: index * width,
       animated: true
     })
-        // scroll flatlist
+    // scroll flatlist
   }
-  useEffect(() => {
-    StatusBar.setBarStyle('light-content');
-    return () => {
-      StatusBar.setBarStyle('default');
-    };
-  }, []);
-
+  const renderloading = () => {
+    return <View className="w-screen justify-center items-center h-screen m-auto flex bg-white">
+      {/* {loader &&  */}
+      <ActivityIndicator
+        animating={true}
+        color="#7010ff"
+        size={60}
+        speed={3}
+      />
+    </View>
+  }
   const renderHeader = () => (
     <Animated.View className="flex absolute w-full z-50 flex-row justify-between p-3 items-center">
       <TouchableOpacity activeOpacity={0.8} className="bg-white elevation w-fit rounded-full p-3" onPress={() => router.back()}>
         <Icon name="arrow-back-outline" size={24} color="#7910ff" />
       </TouchableOpacity>
       <View>
-        <TouchableOpacity className="bg-white elevation w-fit rounded-full p-3" >
-          <Icon name="heart-outline" size={24} color="#7910ff" />
+        <TouchableOpacity activeOpacity={0.8} onPress={() => handleToggleFavorite(details.ad_id)} className="bg-white elevation w-fit rounded-full p-3" >
+        <Icon name={"heart-outline"} size={25} color={"#7910ff"} />
+        {/* <Icon name={`${item.is_favorite ? "heart" : "heart-outline"}`} size={25} color={"#7910ff"} /> */}
+
         </TouchableOpacity>
       </View>
     </Animated.View>
@@ -191,78 +305,176 @@ const ProductScreen = ({ navigation }) => {
   //   </View>
   // );
   const renderImageGallery = () => (
-    <View className="w-screen h-[400px]">
-     <FlatList
-        onMomentumScrollEnd={ev => {scrollToActiveIndex(Math.floor(ev.nativeEvent.contentOffset.x / width))}}
-        ref={topRef} 
-        className="w-full h-full "
-        data={images}
+    <View className="w-screen h-[85vh]">
+      <FlatList
+        onMomentumScrollEnd={ev => { scrollToActiveIndex(Math.floor(ev.nativeEvent.contentOffset.x / width)) }}
+        ref={topRef}
+        className="w-full h-full"
+        data={files}
         keyExtractor={item => item.id.toString()}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
-        renderItem={({item}) => (
-          <View className="w-screen">
-                <Image 
-                    resizeMode='cover'
-                    className="w-screen h-full"
-                    source={{uri: item.url}}
-                />
+        renderItem={({ item }) => (
+          <View className="w-screen rounded-b-lg">
+            <Image
+              resizeMode='cover'
+              className="w-screen rounded-b-lg h-full"
+              source={{ uri: item.location }}
+            />
           </View>
-          )} 
-     />
-     <View className="bg-white rounded-xl absolute flex flex-row items-center justify-center bottom-4 p-1 mx-3 ">
-      <FlatList 
-        ref={thumRef}
-        className="w-full"
-        data={images}
-        keyExtractor={item => item.id.toString()}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{display: 'flex', alignItems: 'center'}}
-        renderItem={({item, index}) => (
-          <TouchableOpacity 
-          // activeOpacity={}
-            onPress={() => scrollToActiveIndex(index)}
-          >
-            <View className={` ${index === activeIndex ? 'border-2 border-principal p-[2px] ' : 'border border-transparent'} rounded-xl mr-1`}>
-                <Image 
-                    resizeMode='cover'
-                    className={`w-16 border-red-600 h-16 rounded-xl`}
-                    source={{uri: item.url}}
+        )}
+      />
+      <View className="bg-white rounded-lg absolute elevation flex flex-row items-center justify-center bottom-[12%] p-1 mx-3 ">
+        <FlatList
+          ref={thumRef}
+          className="w-full"
+          data={files}
+          keyExtractor={item => item.id.toString()}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ display: 'flex', alignItems: 'center' }}
+          renderItem={({ item, index }) => (
+            <TouchableOpacity
+              // activeOpacity={}
+              onPress={() => scrollToActiveIndex(index)}
+            >
+              <View className={` ${index === activeIndex ? 'border-2 elevation border-principal p-[2px] ' : 'border border-transparent'} rounded-xl mr-1`}>
+                <Image
+                  resizeMode='cover'
+                  className={`w-16 border-red-600 elevation h-16 rounded-lg`}
+                  source={{ uri: item.location }}
                 />
-          </View>
-          </TouchableOpacity>
-          
-          )} 
-     />
-     </View>
-     
-    </View>
-  );
-  const renderProductInfo = () => (
-    <View className="px-4 py-2">
-       <View className="flex flex-row space-x-1 justify-center items-center">
-          <Text className="text-[#333] text-base font-rregular" >Posted by :</Text>
-          <Text className="text-base font-rmedium text-principal" >Sub-Category</Text>
+              </View>
+            </TouchableOpacity>
+
+          )}
+        />
       </View>
-      <View className="flex flex-row items-center justify-between my-2" >
-        <Text className="text-xl text-[#333] font-rmedium">Men's Jacket</Text>
-        <Text className="font-rregular text-[#666]">Sub-category</Text>
-      </View>
-      <Text className="text-base text-[#333] font-rmedium">Description</Text>
-      <Text className="text-[15px] font-rregular leading-6 text-[#666] " numberOfLines={expanded ? undefined : 3}>
-        A men's jacket is a versatile outerwear garment designed to provide warmth, style, and protection. Typically featuring a front opening with buttons...
-      </Text>
-      <TouchableOpacity activeOpacity={0.8} className="" onPress={() => setExpanded(!expanded)}>
-        <Text className="text-principal text-sm font-rmedium">{expanded ? 'Read less' : 'Read more'}</Text>
-      </TouchableOpacity>
+
     </View>
   );
 
-  const renderSizeSelector = () => (
-    <View className="w-full">
-      <Text className="mt-4 text-lg font-normal font-rregular text-[#333]">Selected size: {selectedSize} </Text>
+
+  const renderAddToCart = () => (
+    <View className="flex bg-white flex-row w-full justify-between p-4 rounded-t-xl items-center border-t-2 border-t-[#eee]">
+      <View className="">
+        <Text className="text-[#666] text-sm font-normal">Price</Text>
+        <Text className="text-2xl text-[#333] font-rmedium">XOF {details.final_price} </Text>
+      </View>
+      <TouchableOpacity activeOpacity={0.8} onPress={() => handleAddToCart(details)} className="bg-principal space-x-2 px-5 py-3 items-center flex flex-row justify-center rounded-full" >
+        <Icon name="cart-outline" size={24} color="#fff" />
+        <Text className="text-base text-white font-rmedium " style={styles.addToCartText}>Add to cart</Text>
+      </TouchableOpacity>
+    </View>
+  );
+  const renderAdDetailsCard = () => {
+
+    const animatedIndex = useSharedValue(0);
+    const [expanded, setExpanded] = useState(false);
+    const sizes = ['S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
+    const colorsArray = [
+      "#91A1B0",
+      "#B11D1D",
+      "#1F44A3",
+      "#9F632A",
+      "#1D752B",
+      "#000000",
+    ];
+    const [selectedSize, setSelectedSize] = useState("M");
+    const [selectedColor, setSelectedColor] = useState("#B11D1D");
+    const snapPoints = useMemo(() => ['12%', '80%'], []);
+    const colors = {
+      primary: '#070f18',
+      gray: '#8b8989',
+      lightGray: '#b2b2b2',
+      light: '#fbfbfb',
+      white: '#fff',
+      black: '#000',
+    };
+    const titleStyle = useAnimatedStyle(() => ({
+      color: interpolateColor(
+        animatedIndex.value,
+        [0, 0.08],
+        [colors.white, colors.primary],
+      ),
+      marginBottom: interpolate(
+        animatedIndex.value,
+        [0, 0.08],
+        [0, 10],
+        Extrapolation.CLAMP,
+      ),
+    }));
+    const headboxStyle = useAnimatedStyle(() => ({
+      opacity: interpolate(
+        animatedIndex.value,
+        [0, 0.08],
+        [1, 0],
+        Extrapolation.CLAMP,
+      ),
+      height: animatedIndex.value > 0.08 ? 0 : 'auto',
+      overflow: 'hidden',
+    }));
+
+    const contentStyle = useAnimatedStyle(() => ({
+      transform: [
+        {
+          translateY: interpolate(
+            animatedIndex.value,
+            [0, 0.08],
+            [40, 0],
+            Extrapolation.CLAMP,
+          ),
+        },
+      ],
+      opacity: interpolate(
+        animatedIndex.value,
+        [0, 0.08],
+        [0, 1],
+        Extrapolation.CLAMP,
+      ),
+    }));
+    const CustomHandler = () => {
+      return <View className="my-2"></View>;
+    };
+    const CustomBackground = ({ animatedIndex, style }) => {
+      const containerStyle = useAnimatedStyle(() => ({
+        ...style,
+        backgroundColor: '#fff',
+        borderTopLeftRadius: 15,
+        borderTopRightRadius: 15,
+        opacity: interpolate(
+          animatedIndex.value,
+          [0, 0.08],
+          [0, 1],
+          Extrapolation.CLAMP,
+        ),
+      }));
+      return <Reanimated.View style={containerStyle} />;
+    };
+    const renderProductInfo = () => (
+      <View className="py-2 ">
+        <View className="flex flex-row space-x-1 justify-center items-center">
+          <Text className="text-[#333] text-base font-rregular" >Posted by :</Text>
+          <Text className="text-base font-rmedium text-principal" >{details.shop_title}</Text>
+        </View>
+        <View className="flex flex-row items-center justify-between my-2" >
+          <Text className="text-2xl text-[#333] font-rmedium">{details.title}</Text>
+          <Text className="font-rregular text-[#666]">{details.category_title}</Text>
+        </View>
+        <Text className="text-base text-[#333] font-rmedium">Description</Text>
+        <Text className="text-[15px] font-rregular leading-6 text-[#666] " numberOfLines={expanded ? undefined : 3}>
+          {details.description}...
+        </Text>
+        <TouchableOpacity activeOpacity={0.8} className="" onPress={() => setExpanded(!expanded)}>
+          <Text className="text-principal text-sm font-rmedium">{expanded ? 'Read less' : 'Read more'}</Text>
+        </TouchableOpacity>
+      </View>
+    );
+
+    const renderSizeSelector = () => (
+      <View className="w-full">
+        <Text className="mt-4 text-lg font-normal font-rregular text-[#333]">Selected size: {selectedSize} </Text>
         <View className="flex-row my-2">
           {['S', 'M', 'L', 'XL', 'XXL', 'XXXL'].map((size) => (
             <TouchableOpacity
@@ -276,12 +488,12 @@ const ProductScreen = ({ navigation }) => {
             </TouchableOpacity>
           ))}
         </View>
-    </View>
-  );
+      </View>
+    );
 
-  const renderColorSelector = () => (
-    <View className="w-full">
-     <Text className="mt-4 text-lg font-normal text-[#282534]">Selected color </Text>
+    const renderColorSelector = () => (
+      <View className="w-full">
+        <Text className="mt-4 text-lg font-normal text-[#282534]">Selected color </Text>
         <View className="flex-row">
           {colorsArray.map((color, index) => (
             <TouchableOpacity
@@ -289,226 +501,92 @@ const ProductScreen = ({ navigation }) => {
               onPress={() => setSelectedColor(color)}
               className="h-9 mr-2 w-9 rounded-full"
             >
-              <View  className={`flex-1 p-1 rounded-full ${selectedColor === color ? 'border-2' : ''}`}
+              <View className={`flex-1 p-1 rounded-full ${selectedColor === color ? 'border-2' : ''}`}
                 style={{ borderColor: selectedColor === color ? color : 'transparent' }}>
                 <View className="flex-1 rounded-full" style={{ backgroundColor: color }}></View>
               </View>
             </TouchableOpacity>
           ))}
         </View>
-    </View>
-  );
-
-  const renderAddToCart = () => (
-    <View className="flex flex-row w-full justify-between p-4 rounded-t-xl items-center border-t-2 border-t-[#eee]">
-      <View className="">
-        <Text className="text-[#666] text-sm font-normal">Price</Text>
-        <Text className="text-2xl text-[#333] font-rmedium">XOF 10.000</Text>
       </View>
-      <TouchableOpacity className="bg-principal space-x-2 px-5 py-3 items-center flex flex-row justify-center rounded-full" >
-        <Icon name="cart-outline" size={24} color="#fff" />
-        <Text className="text-base text-white font-rmedium " style={styles.addToCartText}>Add to cart</Text>
-      </TouchableOpacity>
-    </View>
-  );
+    );
+    return (
+      <BottomSheet
+        index={0}
+        animatedIndex={animatedIndex}
+        snapPoints={snapPoints}
+        contentContainerStyle={{marginVertical: 15}}
+        backgroundComponent={CustomBackground}
+        handleComponent={CustomHandler}>
+        <Animatable.View
+          animation="fadeInUp"
+          delay={500}
+          easing="ease-in-out"
+          duration={400}>
+          <Reanimated.View className="flex justify-center bg-[#00000066] items-center" style={headboxStyle}>
+            <AwesomeIcon className="" name="angle-double-up" size={26} color="#fff" />
+            <Reanimated.Text className="text-base text-center text-white font-rregular " >
+              Swipe up for details
+            </Reanimated.Text>
+          </Reanimated.View  >
 
+        </Animatable.View>
+        <BottomSheetScrollView
+          showsVerticalScrollIndicator={false}
+          showsHorizontalScrollIndicator={false}>
+          <Reanimated.View className="px-4" style={contentStyle}>
+            {renderProductInfo()}
+            {renderSizeSelector()}
+            {renderColorSelector()}
+            <Text className="mt-4 text-lg font-normal text-[#282534]">Weight : 1 pound</Text>
+            <Text>Lorem ipsum dolor sit amet consectetur adipisicing elit. Praesentium officia odio est quia fuga, reiciendis nostrum exercitationem minus assumenda veniam officiis vero. Ea voluptatibus voluptates ducimus praesentium, explicabo eveniet fugit.
+            Ullam veniam facilis dolor, autem deleniti suscipit maxime voluptatum vel non voluptates magnam eius, obcaecati modi est in provident quisquam dicta amet possimus laudantium quidem reiciendis. Veritatis commodi tempore beatae!
+            Optio qui in, ex hic dolorem itaque soluta sed illo pariatur eos delectus eum similique nisi id fugiat. Provident explicabo ipsa minus distinctio eius ex iusto, harum facilis blanditiis corrupti.</Text>
+          </Reanimated.View>
+        </BottomSheetScrollView>
+      </BottomSheet>
+    );
+  };
   return (
-    <SafeAreaView style={styles.container}>
-      <Animated.ScrollView
-        showsVerticalScrollIndicator={false}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: true }
-        )}
-        scrollEventThrottle={16}
-      >
-        {renderHeader()}
-        {renderImageGallery()}
-        {renderProductInfo()}
-        {renderSizeSelector()}
-        {renderColorSelector()}
-        <Text className="mt-4 text-lg font-normal text-[#282534]">Weight : 1 pound</Text>
-      </Animated.ScrollView>
-    
-  
-      {renderAddToCart()}
-    </SafeAreaView>
+    <>
+    <Skeleton.Group show={true}>
+      <SafeAreaView style={styles.container}>
+        {loader && renderloading()}
+        <GestureHandlerRootView>
+          <Animated.ScrollView
+            className="bg-white z-50"
+            showsVerticalScrollIndicator={false}
+            onScroll={Animated.event(
+              [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+              { useNativeDriver: true }
+            )}
+            scrollEventThrottle={16}
+          >
+            {renderHeader()}
+            {renderImageGallery()}
+            {renderAdDetailsCard()}
+          </Animated.ScrollView>
+          {renderAddToCart()}
+        </GestureHandlerRootView>
+      </SafeAreaView>
+    </Skeleton.Group>
+    <Modal isLoading={loader} ref={modalRef}>
+       <View className="flex items-center">
+       <Text className="text-xl text-center font-psemibold mb-4 text-black">{title}</Text>
+          <Image
+            source={`${title === "Success !" ? images.success : images.error}`}
+            resizeMode='contain'
+            className={`${title != "Success !" ? 'w-[100px] h-[50px]' : 'w-[200px] h-[70px]'}`}
+          />
+         <Text className="text-sm text-center my-4 text-gray-500 font-regular">{message || 'An error occured. Please, try again later'}</Text>
+         <TouchableOpacity className={`${title === "Success !" ? 'bg-green-500' : "bg-red-500" } py-2 px-6 rounded-md text-white`} onPress={closeModal}>
+         <Text className="text-white font-bold">Fermer</Text>
+         </TouchableOpacity>
+       </View>
+     </Modal>
+    </>
   );
-};
-
-const AnimatedDivider = Animated.createAnimatedComponent(Divider);
-
-const TripDetailsCard = ({trip}) => {
-  const animatedIndex = useSharedValue(0);
-  const snapPoints = useMemo(() => ['30%', '80%'], []);
-  const titleStyle = useAnimatedStyle(() => ({
-    color: interpolateColor(
-      animatedIndex.value,
-      [0, 0.08],
-      [colors.white, colors.primary],
-    ),
-    marginBottom: interpolate(
-      animatedIndex.value,
-      [0, 0.08],
-      [0, 10],
-      Extrapolation.CLAMP,
-    ),
-  }));
-
-const locationStyle = useAnimatedStyle(() => ({
-    color: interpolateColor(
-      animatedIndex.value,
-      [0, 0.08],
-      [colors.white, colors.lightGray],
-    ),
-    fontSize: interpolate(
-      animatedIndex.value,
-      [0, 0.08],
-      [sizes.title, sizes.body],
-      Extrapolation.CLAMP,
-    ),
-  }));
-
-const locationIonStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        scale: interpolate(
-          animatedIndex.value,
-          [0, 0.08],
-          [0, 1],
-          Extrapolation.CLAMP,
-        ),
-      },
-    ],
-  }));
-
-  const contentStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        translateY: interpolate(
-          animatedIndex.value,
-          [0, 0.08],
-          [40, 0],
-          Extrapolation.CLAMP,
-        ),
-      },
-    ],
-    opacity: interpolate(
-      animatedIndex.value,
-      [0, 0.08],
-      [0, 1],
-      Extrapolation.CLAMP,
-    ),
-  }));
-
-  return (
-    <BottomSheet
-      index={0}
-      animatedIndex={animatedIndex}
-      snapPoints={snapPoints}
-      backgroundComponent={CustomBackground}
-      handleComponent={CustomHandler}>
-      <Animatable.View
-        style={styles.header}
-        animation="fadeInUp"
-        delay={500}
-        easing="ease-in-out"
-        duration={400}>
-        <Animated.Text style={[styles.title, titleStyle]}>
-          {trip.title}
-        </Animated.Text>
-        <View style={styles.location}>
-          <Animated.Text style={[styles.locationText, locationStyle]}>
-            {trip.location}
-          </Animated.Text>
-          <Animated.View style={locationIonStyle}>
-            <Icon icon="Location" size={20} style={styles.locationIcon} />
-          </Animated.View>
-        </View>
-      </Animatable.View>
-      <AnimatedDivider style={contentStyle} />
-      <BottomSheetScrollView
-        style={styles.scrollBox}
-        showsVerticalScrollIndicator={false}
-        showsHorizontalScrollIndicator={false}>
-        <Animated.View style={contentStyle}>
-          <RatingOverall rating={trip.rating} containerStyle={styles.rating} />
-          <SectionHeader
-            title="Summary"
-            containerStyle={styles.sectionHeader}
-            titleStyle={styles.sectionTitle}
-          />
-          <View style={styles.summary}>
-            <Text style={styles.summaryText}>{trip.description}</Text>
-          </View>
-          <SectionHeader
-            title="Hotels"
-            containerStyle={styles.sectionHeader}
-            titleStyle={styles.sectionTitle}
-            onPress={() => {}}
-            buttonTitle="See All"
-          />
-          <HotelsCarousel hotels={trip.hotels} />
-          <SectionHeader
-            title="Reviews"
-            containerStyle={styles.sectionHeader}
-            titleStyle={styles.sectionTitle}
-            onPress={() => {}}
-            buttonTitle="See All"
-          />
-          <Reviews reviews={trip.reviews} />
-        </Animated.View>
-      </BottomSheetScrollView>
-    </BottomSheet>
-  );
-};
-
-const styles = StyleSheet.create({
-  header: {
-    paddingVertical: spacing.l,
-    paddingHorizontal: spacing.l,
-  },
-  title: {
-    fontSize: sizes.title,
-    fontWeight: 'bold',
-    color: colors.white,
-  },
-  location: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-  },
-  locationText: {
-    fontSize: sizes.title,
-    color: colors.white,
-  },
-  locationIcon: {
-    tintColor: colors.gray,
-  },
-  scrollBox: {
-    marginTop: spacing.s,
-    marginBottom: spacing.m,
-  },
-  sectionHeader: {
-    marginTop: spacing.m,
-  },
-  sectionTitle: {
-    color: colors.lightGray,
-    fontWeight: 'normal',
-  },
-  summary: {
-    marginHorizontal: spacing.l,
-  },
-  summaryText: {
-    color: colors.primary,
-  },
-  rating: {
-    marginHorizontal: spacing.l,
-  },
-});
-
-
-
-
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -572,7 +650,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  
+
 });
 
-export default ProductScreen;
+export default details;

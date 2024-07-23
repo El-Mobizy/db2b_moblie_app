@@ -28,7 +28,7 @@ import CartComponent from '../../components/cart';
 import { CustomButton, FormField } from "../../components";
 import { GestureHandlerRootView, } from 'react-native-gesture-handler';
 import { useDispatch, useSelector } from 'react-redux';
-import { getAllProducts, toggleToFavorite,  } from '../../store/features/productSlice';
+import { getAllProducts, toggleToFavorite, getAllFavorites  } from '../../store/features/productSlice';
 import { addToCart } from '../../store/features/cartSlice'
 import { useNavigation } from "@react-navigation/native";
 import Modal from '../../components/Modal'; 
@@ -38,15 +38,16 @@ const Home = ({ handleSwitch, showMenu }) => {
   const [products, setProducts] = useState([]);
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
+  const [favorite, setFavorite] = useState([]);
   const modalRef = useRef(null);
   const [loader, setLoader] = useState(false)
   const { isLoading } = useSelector(state => state.products);
   const handleProductDetails = (item) => {
-    const jsonString = JSON.stringify(item);
+    const jsonString = JSON.stringify(item.uid);
     router.push(
       {
         pathname: "/details",
-        params: { item: jsonString }
+        params: { uid: jsonString }
       }
     );
   };
@@ -81,8 +82,9 @@ const Home = ({ handleSwitch, showMenu }) => {
       openModal()
       const response = await dispatch(toggleToFavorite(adId)).unwrap();
       console.log('Requête terminée');
-      const wislist = response.data
+      const wislist = response.data.data
       console.log('liste des favoris', wislist);
+      setFavorite(wislist)
       const info = response?.message ?? "An error occured. Please, try again later";
       if (info) {
         setLoader(false)
@@ -99,7 +101,7 @@ const Home = ({ handleSwitch, showMenu }) => {
     } finally {
     }
   };
-  handleAddToCart = (item) => {
+ const handleAddToCart = (item) => {
     const cartItem = {
         "id": item.id,
         "category_title": item.category_title,
@@ -115,17 +117,40 @@ const Home = ({ handleSwitch, showMenu }) => {
     setTitle("Success !")
     setMessage('Ad added to cart successfully')
   };
+  const handleGetFavorites = async () => {
+    try {
+        const response = await dispatch(getAllFavorites()).unwrap();
+        const info = response.data.data;
+        console.log("wishlist", info)
+        setFavorite(info);
+    } catch (error) {
+        console.error("Erreur lors de la récupération des favoris", error);
+    }
+};
+  const updateFavorites = (products, favorites) => {
+    console.log(products);
+    return products.map(product => ({
+      ...product,
+      onFavorite: Array.isArray(favorites) && favorites.some(favorite => favorite.ad_id === product.id)
+    }));
+  };
   useEffect(() => {
     // console.log('je suis au moins rentré');
     handleGetProducts()
+    handleGetFavorites()
   }, [dispatch]);
+  useEffect(() => {
+    const updatedProducts = updateFavorites(products, favorite);
+    console.log('produit à jour', updatedProducts);
+    setProducts(updatedProducts);
+  }, [favorite]);
   const handleGetProducts = async () => {
     try {
       const response = await dispatch(getAllProducts()).unwrap();
       console.log('Requête terminée');
       const info = response.data;
       setProducts(info)
-      console.log('les produits meme', info);
+      // console.log('les produits meme', info);
     } catch (error) {
     } finally {
     }
@@ -197,13 +222,6 @@ const Home = ({ handleSwitch, showMenu }) => {
             </View>
           </View>
         </View>
-
-
-
-
-
-
-
 
         <ScrollView className=" bg-white">
           <Slider></Slider>

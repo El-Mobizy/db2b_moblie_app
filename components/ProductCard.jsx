@@ -5,9 +5,9 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { } from 'react-native-gesture-handler';
 const COLORS = { principal: '#7910ff' }
 
-const ProductCard = ({ item, handleProductClick, toggleFavorite, addProductToCart }) => {
+const ProductCard = ({ item, handleProductClick, toggleFavorite, addProductToCart}) => {
   useEffect(() => {
-    // console.log(item.image) 
+  //  console.log(item);
   }, [item])
   return (
     <TouchableOpacity
@@ -27,7 +27,7 @@ const ProductCard = ({ item, handleProductClick, toggleFavorite, addProductToCar
                       toggleFavorite(item.id);
                     }}
                   >
-                    <Icon name={`${item.is_favorite ? "heart" : "heart-outline"}`} size={25} color={COLORS.principal} />
+                    <Icon name={`${item.onFavorite ? "heart" : "heart-outline"}`} size={25} color={COLORS.principal} />
                   </TouchableOpacity>
                 </View>
               </View>

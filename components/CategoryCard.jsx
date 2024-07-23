@@ -20,6 +20,7 @@ const CategoryCard = () => {
       console.log('Requête terminée');
       const info = response.data;
       setTags(info)
+      console.log('Les categories meme', info);
     } catch (error) {
     } finally {
     }
