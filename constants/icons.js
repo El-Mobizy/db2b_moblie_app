@@ -16,6 +16,7 @@ import facebook from "../assets/icons/facebook.png";
 import apple from "../assets/icons/apple.png";
 import pencil from "../assets/icons/pencil.png"
 import lock from "../assets/icons/lock.png"
+import reset from "../assets/icons/reset.png"
 import validpass from "../assets/images/password-check.png"
 import invalidpass from "../assets/images/password-minus.png"
 import filter from "../assets/icons/filter.png"
@@ -40,5 +41,6 @@ export default {
   lock,
   validpass, 
   invalidpass,
-  filter
+  filter, 
+  reset
 };

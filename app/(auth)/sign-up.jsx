@@ -154,7 +154,7 @@ const SignUp = () => {
           />
           <FormField
           type="number"
-            title="Télephone"
+            title="Phone"
             value={user.telephone}
             otherStyles="mt-10"
             keyboardType="number-pad"
@@ -163,7 +163,7 @@ const SignUp = () => {
           />
           <FormField
             type="password"
-            title="Mot de passe"
+            title="Password"
             value={user.password}
             otherStyles="mt-7"
             handleChangeText={(e) => handleInputChange('password', e)}
@@ -179,20 +179,20 @@ const SignUp = () => {
             <BouncyCheckbox
               isChecked={isChecked}
               size={25}
-              fillColor="#A734C4"
+              fillColor="#7910ff"
               unFillColor="#FFFFFF"
               onPress={handleCheckBoxChange}
             />
-            <Text className="text-sm mr-1 font-pregular">J'ai lu les</Text>
+            <Text className="text-sm mr-1 font-pregular">I read the</Text>
             <Link
               href="/"
-              className="text-sm w-fit font-pregular underline text-[#D142F5]"
+              className="text-sm w-fit font-pregular underline text-[#7910ff]"
             >
-              <Text>Termes et conditions</Text> 
+              <Text>terms and conditions</Text> 
             </Link>
           </View>
           <CustomButton
-            title="S'inscrire"
+            title="Register"
             handlePress={handleSignUp}
             containerStyles="min-h-[56px]"
             textStyles={'text-lg'}
@@ -208,7 +208,7 @@ const SignUp = () => {
           />
           <Text className="text-base text-center my-4 text-gray-500 font-rmedium" >{message || 'An error occured. Please, try again later'}</Text>
           <TouchableOpacity className={`${title === "Success !" ? 'bg-green-500' : "bg-red-500"} py-2 px-6 rounded-md text-white`} onPress={closeModal}>
-            <Text className="text-white font-bold">Fermer</Text>
+            <Text className="text-white font-bold">Close</Text>
           </TouchableOpacity>
         </View>
       </Modal>

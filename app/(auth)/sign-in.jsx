@@ -4,7 +4,7 @@ import { View, Text, ScrollView, Dimensions, Alert, Image, TouchableOpacity } fr
 import { images, icons } from "../../constants";
 import { useDispatch, useSelector } from 'react-redux';
 import { CustomButton, FormField } from "../../components";
-import { setEmail, setTelephone, setPassword, setIp, setValidation, sendMail, loginUser, blockUser, getUserIpAddress } from '../../store/features/userSlice';
+import { setEmail, setTelephone, setPassword, setIp, setValidation, sendMail, loginUser, blockUser, getUserIpAddress, recoverPassword } from '../../store/features/userSlice';
 import * as Network from "expo-network";
 // import { useGlobalContext } from "../../context/GlobalProvider";
 import Modal from '../../components/Modal';
@@ -15,8 +15,10 @@ const SignIn = () => {
   // const [isConnecting, setIsConnecting] = useState(false)
   const [step, setStep] = useState(0);
   const [count, setCount] = useState(0);
+  const [viewHeight, setViewHeight] = useState(0);
   const [currentEmail, setCurrentEmail] = useState('');
   const dispatch = useDispatch();
+  const bottomSheetRef = useRef(null);
   const modalRef = useRef(null);
   const user = useSelector(state => state.user);
   const [ipAddress, setIpAddress] = useState(undefined);
@@ -39,7 +41,6 @@ const SignIn = () => {
     };
     getIpAddress();
   }, [ipAddress]);
-
   useEffect(() => {
     // Réinitialise le compteur de tentatives si l'email change
     if (user.email !== currentEmail) {
@@ -98,12 +99,12 @@ const SignIn = () => {
       } catch (error) {
         setSubmitting(false)
         setTitle("Error !")
-        setMessage(error.message || "Une erreur est survenue")
+        setMessage(error.message || "An error occured.")
       } finally {
         setSubmitting(false);
       }
     } else {
-      Alert.alert("Erreur", "Veuillez remplir tous les champs correctement.");
+      Alert.alert("Error", "Please fill in all fields correctly.");
       setSubmitting(false);
     }
   };
@@ -175,11 +176,10 @@ const SignIn = () => {
         setSubmitting(false);
       }
     } else {
-      Alert.alert("Erreur", "Veuillez remplir tous les champs correctement.");
+      Alert.alert("Erreur", "Please fill in all fields correctly.");
       setSubmitting(false);
     }
   };
-
   return (
     <>
       {step === 0 &&
@@ -196,7 +196,7 @@ const SignIn = () => {
       }
       {step === 1 &&
         <View>
-          <Text className="text-base text-black font-rregular my-6 text-center">Heureux de vous revoir. Veuillez entrer votre mot de passe</Text>
+          <Text className="text-base text-black font-rregular my-6 text-center">Happy to see you again. Please enter your password</Text>
           <View className="flex flex-row w-full h-[50px] px-4 relative rounded-md border border-gray-400 justify-between items-center">
             <Text className="text-gray-500 font-rregular text-sm ml-2 bg-white px-2 -top-3 absolute">Email</Text>
             <Text className=" text-base font-rregular text-principal">{split(user.email, 20)}</Text>
@@ -214,7 +214,7 @@ const SignIn = () => {
           </View>
           <FormField
             type="password"
-            title="Mot de passe"
+            title="Password"
             otherStyles="mt-8"
             valeur={user.password}
             isLoading={user.isLoading}
@@ -222,14 +222,12 @@ const SignIn = () => {
             handleValidationChange={handleValidationChange}
           />
           <View className="flex py-4 justify-end flex-row gap-2">
-            <Link
-              href="/sign-in"
-            >
-              <Text className="text-sm font-rregular underline text-principal">Mot de passe oublié ?</Text>
-            </Link>
+              <TouchableOpacity onPress={() => {router.push('/forgotPassword')}} >
+                <Text className="text-sm font-rmedium underline text-principal">Forgot Password ?</Text>
+              </TouchableOpacity>
           </View>
           <CustomButton
-            title="Se Connecter"
+            title="Login"
             handlePress={handlelogin}
             containerStyles="mb-4 min-h-[50px]"
             textStyles={"text-lg font-rmedium"}
@@ -239,19 +237,18 @@ const SignIn = () => {
       }
       {step === 0 &&
         <CustomButton
-          title="Envoyer"
+          title="Send"
           handlePress={handleSendMail}
           containerStyles=" my-8 min-h-[50px]"
           textStyles={"text-lg font-rmedium"}
         // isLoading={isSubmitting}
         />}
-
       <View className="flex flex-col justify-center items-center gap-2">
         <Text className="text-base text-black text-center font-rre  gular">
-          ou
+          or
         </Text>
         <Text className="text-base text-black text-center font-rregular">
-          Se connecter avec
+          Login with
         </Text>
         <View className="flex flex-row justify-center pt-4 items-center space-x-8">
           <Image

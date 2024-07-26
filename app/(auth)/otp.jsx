@@ -6,12 +6,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { View, Text, ScrollView, Dimensions, Alert, Image, TouchableOpacity, ActivityIndicator, Pressable } from "react-native";
 import { images, icons } from "../../constants";
 import CustomButton from "../../components/CustomButton";
-import BottomSheet from "../../components/BottomSheet"
+import CustomBottomSheet from "../../components/CustomBottomSheet";
+import PageTitle from '../../components/PageTitle';
 import { OtpInput } from "react-native-otp-entry";
-import { sendCode } from '../../store/features/userSlice';
+import { getNewCode, sendCode } from '../../store/features/userSlice';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Modal from '../../components/Modal';
-
 const Otp = () => {
   const dispatch = useDispatch();
   const [otp, setOtp] = useState('');
@@ -40,11 +40,11 @@ const Otp = () => {
     setViewHeight(height);
     console.log('Content Height:', viewHeight);
   };
-  useEffect(() => {
-    if (bottomSheetRef.current) {
-        bottomSheetRef.current.scrollTo(-(viewHeight + 20));
-      }
-}, [viewHeight]);
+//   useEffect(() => {
+//     if (bottomSheetRef.current) {
+//         bottomSheetRef.current.scrollTo(-(viewHeight + 20));
+//       }
+// }, [viewHeight]);
   const handleSendCode = async () => {
     console.log(isfilled);
     console.log(otp);
@@ -53,7 +53,7 @@ const Otp = () => {
       openModal()
       try {
         console.log('Ce que je t`\'envoie', otp);
-        const data= {
+        const data = {
            'code' : otp
         }
         const response = await dispatch(sendCode(data)).unwrap();
@@ -64,7 +64,7 @@ const Otp = () => {
           closeModal()
           setSubmitting(false);
           setIscodevalid(true)
-          openBottomSheet()
+          handleOpenBottomSheet()
           // setTimeout(() => {
           //   router.replace('/home')
           // }, 1000);
@@ -73,7 +73,7 @@ const Otp = () => {
           closeModal()
           setSubmitting(false)
           setIscodevalid(false)
-          openBottomSheet()
+          handleOpenBottomSheet()
         }
       }
       catch (error) {
@@ -90,36 +90,62 @@ const Otp = () => {
       Alert.alert('Erreur', 'Veuillez remplir le code')
     }
   };
-  const openBottomSheet = () => {    
-    console.log('j\'ouvre le bottom sheet'); // Scroll to a position, adjust as needed
-    setStatus(true)
-    if (viewHeight > 0 ) {
-      bottomSheetRef.current.scrollTo(-viewHeight)
-  }
+  const handleGetNewCode = async () => {
+    if (bottomSheetRef.current) {
+      handleCloseBottomSheet()
+    }
+    console.log('dans la fonction deja');
+      setSubmitting(true);
+      console.log('apres le setSubmitting');
+      openModal()
+      console.log('apres le openModal');
+      try {
+        const response = await dispatch(getNewCode(user.userId)).unwrap();
+        console.log('Requête terminée');
+        const info = response;
+        console.log('Données reçues:', info);
+        if (info.message == 'code sent successfully !') {
+          setSubmitting(false);
+          setTitle('Success !')
+          setMessage(info.message)
+          setTimeout(() => {
+            router.replace('/home')
+          }, 1000);
+        }
+        else if (info.message != 'code sent successfully !') {
+          setSubmitting(false)
+          setTitle('Error !')
+          setMessage(info.message)
+        }
+      }
+      catch (error) {
+        setSubmitting(false)
+        setTitle("Error !")
+        setMessage(error)
+      }
+      finally {
+
+      }
+    } 
+  const handleOpenBottomSheet = () => {
+    console.log('Ouverture');
+    bottomSheetRef.current.openBottomSheet();
   };
-  const closeBottomSheet = () => {
-    bottomSheetRef.current.scrollTo(0); // Scroll back to top position to close
+
+  const handleCloseBottomSheet = () => {
+    bottomSheetRef.current.closeBottomSheet();
   };
  
   return (
     <GestureHandlerRootView>
-      <SafeAreaView className="h-full bg-white w-full">
+      <SafeAreaView className="h-full bg-white w-full">         
+        <PageTitle  />
       <ScrollView className="h-full">
         <View className="w-full flex justify-center h-full px-4"
           style={{
             minHeight: Dimensions.get("window").height - 100,
           }}
         >
-          <TouchableOpacity
-            activeOpacity={0.7}
-            className={`border border-gray-300 flex flex-row justify-center items-center w-[45px] h-[45px] rounded-full `}
-          >
-            <Image
-              source={icons.leftArrow}
-              resizeMode="contain"
-              className="w-[18px] h-[12px]"
-            />
-          </TouchableOpacity>
           <View className="my-6 flex justify-center mx-auto flex-col ">
             <View className="w-36 h-36 flex justify-center mx-auto items-center rounded-full bg-[#EEEEEE] ">
               <View className="w-28 h-28 bg-principal flex justify-center items-center rounded-full">
@@ -130,7 +156,7 @@ const Otp = () => {
                 />
               </View>
             </View>
-            <Text className="mt-6 text-2xl text-center text-black font-rmedium  ">Verify code</Text>
+            <Text className="mt-6 text-2xl text-center text-black font-rmedium">Verify code</Text>
             <Text className="font-rregular text-base text-center mt-6">Hi, Welcome back ! Please enter the code we just send to<Text className=" pl-2 font-rmedium"> {user.email} </Text></Text>
             <View className="mt-4 ">
               <OtpInput
@@ -158,7 +184,9 @@ const Otp = () => {
             </View>
             <View className="my-8 " >
               <Text className="text-center text-base font-rregular mb-2">Didn't receive code ?</Text>
-              <Text className="text-center text-base text-principal underline font-rregular">Resend Code</Text>
+              <TouchableOpacity onPress={handleGetNewCode}>
+                  <Text className="text-center text-base text-principal underline font-rregular">Resend Code</Text>
+              </TouchableOpacity>
             </View>
             <View >
               <CustomButton
@@ -170,11 +198,9 @@ const Otp = () => {
               />
             </View>
           </View>
-
         </View>
       </ScrollView>
-      {status &&
-        <BottomSheet ref={bottomSheetRef} isVisible={isVisible} height={viewHeight}>
+        <CustomBottomSheet ref={bottomSheetRef} snapPoints={viewHeight > 0 ? [viewHeight] : ['25%', '50%', '75%']}>
            <View onLayout={handleLayout} className="flex justify-center w-full  h-fit py-12 items-center flex-col mx-auto">
              <View className={`w-32 h-32 flex justify-center mx-auto items-center rounded-full ${iscodevalid ? 'bg-[#319F4333]' : 'bg-[#E3362933]'}`}>
             <View className={`w-24 h-24 ${iscodevalid ? 'bg-[#319F43B3]' : 'bg-[#E33629B3]'} flex justify-center items-center rounded-full`}>
@@ -188,23 +214,15 @@ const Otp = () => {
           <Text className="mt-7 text-2xl text-center text-black font-rmedium ">{iscodevalid ? 'Verification Success !' : 'Verification failed !'}</Text>
           {!iscodevalid && <Text className="font-rregular text-base text-center my-6">Dear <Text className=" pl-2 font-rmedium">{user.email}</Text>, please enter the right code or ask to resend a new one.</Text>}
           {iscodevalid && <Text className="font-rlight text-base text-center my-6">Congratulation <Text className=" pl-2 font-rmedium">{user.email}</Text> You have successfully login into your account.</Text>}
-          {!iscodevalid && <Pressable
-            // onPress={handlePress}
+          {!iscodevalid && <TouchableOpacity
+            onPress={handleGetNewCode}
             activeOpacity={0.85}
             className={`bg-[#E33629B3] w-full rounded-full h-[50px] shadow-xl flex flex-row justify-center items-center`}
           >
             <Text className={`text-white font-rmedium text-lg text-center font-normal`}>
              Resend code
             </Text>
-            {/* {isLoading && (
-              <ActivityIndicator
-                animating={isLoading}
-                color="#fff"
-                size="small"
-                className="ml-2"
-              />
-            )} */}
-          </Pressable>}
+          </TouchableOpacity>}
           {iscodevalid && 
           <Pressable
           onPress={() => {router.push("/home")} }
@@ -226,8 +244,7 @@ const Otp = () => {
           }
            </View>
          
-        </BottomSheet>
-      }
+        </CustomBottomSheet>
        <Modal isLoading={isSubmitting} ref={modalRef}>
         <View className="flex items-center">
           <Text className="text-xl text-center font-rmedium mb-4 text-black">{title}</Text>

@@ -19,6 +19,7 @@ const initialState = {
   IpAdress : "",
   token: null,
   userId: null,
+  uid: null,
 };
 // Thunk pour l'inscription
 export const signUpUser = createAsyncThunk(
@@ -40,6 +41,20 @@ export const loginUser = createAsyncThunk(
     try {
       const response = await api.post('/users/login', datalogin);
       console.log("je suis apres la fonction", response.data)
+      return response.data;  
+    } catch (error) {
+      console.log(error);
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+// Thunk pour la connexion
+export const getUserInfo = createAsyncThunk(
+  'user',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.post('user');
       return response.data;  
     } catch (error) {
       console.log(error);
@@ -79,6 +94,19 @@ export const sendMail = createAsyncThunk(
 );
 
 // Thunk pour l'envoi du mail de connexion
+export const recoverPassword = createAsyncThunk(
+  'users/password_recovery_start_step',
+  async (credentials, { rejectWithValue }) => {
+    try {
+      const response = await api.post('users/password_recovery_start_step', credentials);
+      console.log(response.data);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+// Thunk pour l'envoi du mail de connexion
 export const sendCode = createAsyncThunk(
   'users/verification_code',
   async (credentials, { rejectWithValue }) => {
@@ -91,11 +119,35 @@ export const sendCode = createAsyncThunk(
     }
   }
 );
-
+export const sendRecoveryCode = createAsyncThunk(
+  'users/password_recovery_second_step',
+  async (credentials, { rejectWithValue }) => {
+    try {
+      const response = await api.post('users/password_recovery_second_step', credentials);
+      console.log(response.data);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+export const sendRecoveryPassword = createAsyncThunk(
+  'users/password_recovery_end_step',
+  async (credentials, { rejectWithValue }) => {
+    const route = 'users/password_recovery_end_step/'+credentials.uid
+    try {
+      const response = await api.post(route, credentials.data);
+      console.log(response.data);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
 // Thunk pour l'envoi du mail de connexion
 export const getNewCode = createAsyncThunk(
   'users/new_code',
-  async (_, { rejectWithValue }) => {
+  async (userId, { rejectWithValue }) => {
     try {
       const route = 'users/new_code/'+userId;
       const response = await api.post(route);
@@ -106,7 +158,6 @@ export const getNewCode = createAsyncThunk(
     }
   }
 );
-
 const userSlice = createSlice({
   name: 'user',
   initialState,
@@ -119,6 +170,8 @@ const userSlice = createSlice({
     },
     setPassword: (state, action) => {
       state.password = action.payload;
+    },
+    setPasswordConfirmation: (state, action) => {
       state.password_confirmation = action.payload 
     },
     setIp: (state, action) => {
@@ -188,6 +241,28 @@ const userSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
       })
+      .addCase(sendRecoveryCode.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(sendRecoveryCode.fulfilled, (state, action) => {
+        state.isLoading = false;
+      })
+      .addCase(sendRecoveryCode.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      .addCase(sendRecoveryPassword.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(sendRecoveryPassword.fulfilled, (state, action) => {
+        state.isLoading = false;
+      })
+      .addCase(sendRecoveryPassword.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
       .addCase(getNewCode.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -198,10 +273,34 @@ const userSlice = createSlice({
       .addCase(getNewCode.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
-      });
+      })
+      .addCase(getUserInfo.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(getUserInfo.fulfilled, (state, action) => {
+        state.isLoading = false;
+      })
+      .addCase(getUserInfo.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      .addCase(recoverPassword.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(recoverPassword.fulfilled, (state, action) => {
+        state.isLoading = false;
+        console.log(action.payload.uid);
+        state.uid = action.payload.uid
+      })
+      .addCase(recoverPassword.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
   },
 });
 
-export const { setEmail, setTelephone, setPassword, setIp, initialiseData, setValidation } = userSlice.actions;
+export const { setEmail, setTelephone, setPassword, setPasswordConfirmation, setIp, initialiseData, setValidation } = userSlice.actions;
 
 export default userSlice.reducer;

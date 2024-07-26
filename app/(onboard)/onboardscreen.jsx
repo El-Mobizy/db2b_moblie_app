@@ -132,7 +132,7 @@ const onboardscreen = () => {
           {currentSlideIndex == slides.length - 1 ? (
             <CustomButton
             title="CONTINUE"
-            handlePress={() => router.push("/home")}
+            handlePress={() => router.push("/forgotPassword")}
             containerStyles="w-full mb-7 min-h-[50px]"
             textStyles={"text-base font-rbold"}
           />

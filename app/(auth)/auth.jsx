@@ -6,13 +6,15 @@ import { images, icons } from "../../constants";
 import SegmentedControl from "../../components/Segment";
 import SignUp from "./sign-up";
 import SignIn from "./sign-in";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 const AuthRender = () => {
-    const [selectedOption, setSelectedOption] = useState('Connexion');
+    const [selectedOption, setSelectedOption] = useState('Sign-in');
     const handleOptionPress = (option) => {
       setSelectedOption(option);
     };
    return (
-   <SafeAreaView className="bg-white h-full">
+    <GestureHandlerRootView>
+        <SafeAreaView className="bg-white h-full">
     <ScrollView>
       <View
         className="w-full flex justify-center h-full px-4 my-6"
@@ -27,20 +29,22 @@ const AuthRender = () => {
         /> */}
         <View className="w-full pt-6">
           <SegmentedControl
-            options={['Connexion', 'Inscription']}
+            options={['Sign-in', 'Sign-up']}
             selectedOption={selectedOption}
             onOptionPress={handleOptionPress}
           />
         </View>
-        {selectedOption === 'Connexion' &&
+        {selectedOption === 'Sign-in' &&
           <SignIn/>
         }
-        {selectedOption === 'Inscription' &&
+        {selectedOption === 'Sign-up' &&
           <SignUp
           />
         }
       </View>
     </ScrollView>
-  </SafeAreaView>)
+  </SafeAreaView>
+    </GestureHandlerRootView>
+   )
   }
   export default AuthRender;

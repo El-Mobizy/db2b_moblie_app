@@ -140,7 +140,6 @@ const details = () => {
     return () => {
       StatusBar.setBarStyle('default');
     };
-
   },
     [dispatch, uid, l])
   const { uid } = useLocalSearchParams();
