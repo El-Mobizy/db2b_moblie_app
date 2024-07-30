@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { SafeAreaView, StyleSheet, Text, View, Button } from 'react-native';
 import CustomBottomSheet from '../../components/CustomBottomSheet';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 const App = () => {
   const [viewHeight, setViewHeight] = useState(0);
@@ -22,7 +23,8 @@ const App = () => {
   
 };
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <GestureHandlerRootView>
+      <SafeAreaView style={styles.safeArea}>
       <View style={{ flex: 1 }}>
         <Text>App Content Here</Text>
         <Button title="Open BottomSheet" onPress={handleOpenBottomSheet} />
@@ -34,6 +36,8 @@ const App = () => {
         </CustomBottomSheet>
       </View>
     </SafeAreaView>
+    </GestureHandlerRootView>
+    
   );
 };
 

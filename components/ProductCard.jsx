@@ -16,7 +16,7 @@ const ProductCard = ({ item, handleProductClick, toggleFavorite, addProductToCar
         handleProductClick(item);
       }}
     >
-      <View className="w-[45vw] bg-white border border-gray-50 elevation mb-4 rounded-2xl">
+      <View className="w-[45vw] bg-white border border-gray-50 elevation mb-4 p-2 rounded-2xl">
         <View className="w-full h-[230px] flex mx-auto flex-col items-center ">
           <View className="w-full rounded-2xl z-10 h-full overflow-hidden">
             <ImageBackground className='w-full rounded-2xl h-full' resizeMode='cover' source={{ uri: item.image }}>

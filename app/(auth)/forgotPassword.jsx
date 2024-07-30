@@ -5,9 +5,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { images, icons } from "../../constants";
 import CustomBottomSheet from "../../components/CustomBottomSheet";
 import { OtpInput } from "react-native-otp-entry";
+import { Link, router } from "expo-router";
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { CustomButton, FormField } from "../../components";
-import { setEmail, setPassword, setPasswordConfirmation, setIp, setValidation, sendMail, loginUser, blockUser, getUserIpAddress, recoverPassword, sendRecoveryCode, sendRecoveryPassword } from '../../store/features/userSlice';
+import { setEmail, setPassword, setPasswordConfirmation, setIp, setValidation, sendMail, disableUser, getUserIpAddress, recoverPassword, sendRecoveryCode, sendRecoveryPassword, getNewRecoveryCode } from '../../store/features/userSlice';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Modal from '../../components/Modal';
 import PageTitle from '../../components/PageTitle';
@@ -19,6 +20,7 @@ const forgotPassword = () => {
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
   const [otp, setOtp] = useState('');
+  const [count, setCount] = useState(0);
   const [iscodevalid, setIscodevalid] = useState(false)
   const [isfilled, setIsFilled] = useState(false)
   const [viewHeight, setViewHeight] = useState(0);
@@ -47,6 +49,8 @@ const forgotPassword = () => {
     if (user.isValid.mail) {
       setSubmitting(true);
       openModal()
+      dispatch(setPassword(''));
+      dispatch(setPasswordConfirmation(''));
       try {
         const email = { email: user.email }
         console.log(email);
@@ -198,20 +202,24 @@ const forgotPassword = () => {
     console.log('apres le setSubmitting');
     openModal()
     console.log('apres le openModal');
-    try {
-      const response = await dispatch(getNewCode(user.userId)).unwrap();
+    if (count < 3) {
+       try {
+        console.log(user.uid);
+      const response = await dispatch(getNewRecoveryCode(user.uid)).unwrap();
       console.log('Requête terminée');
       const info = response;
       console.log('Données reçues:', info);
-      if (info.message == 'code sent successfully !') {
+      if (info.message == 'Code sent successfully !') {
+        setCount(c => c + 1);
+        console.log(count);
         setSubmitting(false);
         setTitle('Success !')
         setMessage(info.message)
-        setTimeout(() => {
-          router.replace('/home')
-        }, 1000);
+        // setTimeout(() => {
+        //   router.replace('/home')
+        // }, 1000);
       }
-      else if (info.message != 'code sent successfully !') {
+      else if (info.message != 'Code sent successfully !') {
         setSubmitting(false)
         setTitle('Error !')
         setMessage(info.message)
@@ -223,13 +231,35 @@ const forgotPassword = () => {
       setMessage(error)
     }
     finally {
-
     }
+    }
+    else if (count === 3) {
+      try {
+      console.log(count);
+      const blockResponse = await dispatch(disableUser(user.uid)).unwrap();
+      const infblock = blockResponse
+      console.log('Données renvoyé pour le blocage', infblock);
+      setSubmitting(false);
+      setTitle("Error !")
+      setMessage(infblock.message)
+      setTimeout(() => {
+          router.replace('/auth')
+        }, 2000);
+      }
+      catch(error){
+        setTitle("Error !")
+        setMessage(error.message)
+      }
+      finally{
+
+      }
+      
+    }
+   
   }
   const handleLayout = (event) => {
     const { height } = event.nativeEvent.layout;
     setViewHeight(height);
-    console.log('Content Height:', viewHeight);
   };
   return (
     <GestureHandlerRootView>
@@ -311,7 +341,7 @@ const forgotPassword = () => {
                 <View className="my-8 " >
                   <Text className="text-center text-base font-rregular mb-2">Didn't receive code ?</Text>
                   <TouchableOpacity onPress={handleGetNewCode}>
-                    <Text className="text-center text-base text-principal underline font-rregular">Resend Code</Text>
+                    <Text className="text-center text-base text-principal cursor-pointer underline font-rregular">Resend Code</Text>
                   </TouchableOpacity>
                 </View>
                 <View >

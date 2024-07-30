@@ -3,6 +3,8 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../api';
 
 const initialState = { 
+  category: null,
+  activeCategory: null,
   data: null,
   error : "",
   isLoading: false
@@ -25,7 +27,11 @@ const categorySlice = createSlice({
   reducers: {
     initialiseData : (state, action) => {
       state.data = null
-    }
+    },
+    setActiveCategory: (state, action) => {
+      console.log('Valeur recue', action.payload);
+      state.activeCategory = Object.entries(action.payload);
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -35,7 +41,8 @@ const categorySlice = createSlice({
       })
       .addCase(getAllCategory.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.data = action.payload.data
+        state.category = action.payload.data
+        state.activeCategory = action.payload.data[0].subcategories
       })
       .addCase(getAllCategory.rejected, (state, action) => {
         state.isLoading = false;
@@ -45,6 +52,6 @@ const categorySlice = createSlice({
   },
 });
 
-export const { initialiseData } = categorySlice.actions;
+export const { initialiseData, setActiveCategory } = categorySlice.actions;
 
 export default categorySlice.reducer;

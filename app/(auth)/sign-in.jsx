@@ -21,7 +21,7 @@ const SignIn = () => {
   const bottomSheetRef = useRef(null);
   const modalRef = useRef(null);
   const user = useSelector(state => state.user);
-  const [ipAddress, setIpAddress] = useState(undefined);
+  const [ipAddress, setIpAddress] = useState(null);
   const [networkState, setNetworkState] = useState(undefined);
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
@@ -34,7 +34,7 @@ const SignIn = () => {
   useEffect(() => {
     const getIpAddress = async () => {
       const ip = await Network.getIpAddressAsync();
-      console.log('Adresse IP de lutilisateur',ip);
+      console.log('Adresse IP de lutilisateur', ip);
       setIpAddress(ip);
       console.log(ipAddress);
       dispatch(setIp(ip));
@@ -113,9 +113,7 @@ const SignIn = () => {
     console.log(user.isValid.password);
     console.log(user.email);
     console.log(user.password);
-
     if (user.isValid.password) {
-      console.log("je suis au moins rentré dans la fonction");
       setSubmitting(true);
       openModal();
       try {
@@ -124,23 +122,20 @@ const SignIn = () => {
           password: user.password
         };
         console.log(loginData);
-
         const response = await dispatch(loginUser(loginData)).unwrap();
         console.log("Après l'API");
-
         const info = response;
         console.log('Données reçues pour la connexion:', info);
-
-        if (info.error && info.error === "Mot de passe invalide.") {
+        if (info.error && info.error === "Invalid password !") {
           console.log('Adresse IP de l\'utilisateur:', ipAddress);
           setCount(c => c + 1);
           setTitle("Error !")
           setMessage(info.error)
-          if (count + 1 >= 3) {
+          if (count === 2) {
             // Appelez l'API pour bloquer l'utilisateur
             const blockData = {
               email: user.email,
-              ip_address: ipAddress
+              ip_address: user.IpAdress
             };
             console.log(blockData);
             const blockResponse = await dispatch(blockUser(blockData)).unwrap();
@@ -159,7 +154,6 @@ const SignIn = () => {
         else {
           setTitle("Success !")
           setMessage('Login successfully !')
-          dispatch(loginUser(loginData)).unwrap()
           setSubmitting(false);
           setTimeout(() => {
             router.replace('/otp')
@@ -279,7 +273,7 @@ const SignIn = () => {
           />
           <Text className="text-base text-center my-4 text-gray-500 font-rmedium" >{message || 'An error occured. Please, try again later'}</Text>
           <TouchableOpacity className={`${title === "Success !" ? 'bg-green-500' : "bg-red-500"} py-2 px-6 rounded-md text-white`} onPress={closeModal}>
-            <Text className="text-white font-bold">Fermer</Text>
+            <Text className="text-white font-bold">Close</Text>
           </TouchableOpacity>
         </View>
       </Modal>

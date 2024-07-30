@@ -1,24 +1,28 @@
 import { StatusBar } from "expo-status-bar";
+import React, { useEffect, useState } from "react";
 import { Redirect, Link, router } from "expo-router";
 import { View, Text, Image, ScrollView, ImageBackground } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
+import { useDispatch, useSelector } from 'react-redux';
+import { getUserInfo } from '../store/features/userSlice';
 import { images } from "../constants";
 import { CustomButton, Loader } from "../components";
-// import { useGlobalContext } from "../context/GlobalProvider";
 
 const Welcome = () => {
-  // const { loading, isLogged } = useGlobalContext();
+  const dispatch = useDispatch();
+  const {userInfo, isLoading, isLogged} = useSelector(state => state.user);
 
-  // if (!loading && isLogged) return <Redirect href="/home" />;
-
+  useEffect((() => {
+    dispatch(getUserInfo())
+  }), [dispatch])
+  if (!isLoading && isLogged) return <Redirect href="/home" />;
   return (
     <SafeAreaView className="bg-white h-full">
       {/* <Loader isLoading={loading} /> */}
-
       <ScrollView
         contentContainerStyle={{
           height: "100%",
+          backgroundColor: '#fff'
         }}
       >
         <View className="w-full flex justify-center items-center h-full px-4">
@@ -78,7 +82,6 @@ const Welcome = () => {
 
         </View>
       </ScrollView>
-
       <StatusBar backgroundColor="#161622" style="light" />
     </SafeAreaView>
   );

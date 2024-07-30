@@ -9,23 +9,22 @@ import React, { useState, useEffect } from "react";
 import { useSelector } from 'react-redux';
 const COLORS = {principal: '#7910ff'}
 const Tags = () => {
-  const tags = ['Trending', 'Classic', 'Mode']
   // const [tags, setTags] = useState([]);
   const [selected, setSelected] = useState("Trending");
-  const { data , isLoading } = useSelector(state => state.category);
+  const { activeCategory , isLoading } = useSelector(state => state.category);
   useEffect(() => {
     if (!isLoading) {
       // setTags(data)
-      // console.log('je suis dedans' , data);
+      console.log('les sub' , activeCategory);
     }
-  }, [data, isLoading]);
+  }, [activeCategory]);
   return (
     <>
       {!isLoading && 
      ( <View style={styles.container}>
         <FlatList
           horizontal
-          data={tags}
+          data={activeCategory}
           showsHorizontalScrollIndicator={false}
           renderItem={({ item }) => {
             return (
@@ -38,7 +37,7 @@ const Tags = () => {
                     item == selected ? styles.isSelected : null,
                   ]}
                 >
-                  {item}
+                  {item.title}
                 </Text>
               </TouchableOpacity>
             );

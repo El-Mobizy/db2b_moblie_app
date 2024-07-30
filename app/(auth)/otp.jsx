@@ -38,7 +38,6 @@ const Otp = () => {
   const handleLayout = (event) => {
     const { height } = event.nativeEvent.layout;
     setViewHeight(height);
-    console.log('Content Height:', viewHeight);
   };
 //   useEffect(() => {
 //     if (bottomSheetRef.current) {
@@ -65,9 +64,9 @@ const Otp = () => {
           setSubmitting(false);
           setIscodevalid(true)
           handleOpenBottomSheet()
-          // setTimeout(() => {
-          //   router.replace('/home')
-          // }, 1000);
+          setTimeout(() => {
+            router.replace('/home')
+          }, 1000);
         }
         else if (info.message == 'Code invalid') {
           closeModal()

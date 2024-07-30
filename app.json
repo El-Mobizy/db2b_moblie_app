@@ -8,16 +8,17 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splashScreen.png",
+      "image": "./assets/images/splash.png",
       "resizeMode": "strech",
-      "backgroundColor": "#A734C4"
+      "backgroundColor": "fff"
     },
     "platforms": [
       "android",
       "ios"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.db2b.myapp"
     },
     "android": {
       "package": "com.db2b.myapp",

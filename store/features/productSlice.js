@@ -30,7 +30,7 @@ export const getDataFromSecureStore = createAsyncThunk(
       const dataJSON = await SecureStore.getItemAsync(key); // Récupère les données depuis Secure Store avec la clé donnée
       
       const data = JSON.parse(dataJSON) || []; // Convertit les données JSON en objet JavaScript
-      console.log('les produits', data);
+      // console.log('les produits', data);
       return data;
     } catch (error) {
       return rejectWithValue(error.message); // Gère les erreurs avec rejectWithValue pour les traitements de rejet
